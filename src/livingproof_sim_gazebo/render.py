@@ -7,6 +7,7 @@ import signal
 import subprocess
 import tempfile
 import time
+import uuid
 from xml.sax.saxutils import escape
 
 
@@ -24,7 +25,12 @@ def capture(output: Path, deadline: float):
         frames.mkdir()
         world = root / "render.sdf"
         world.write_text(template.replace("__FRAME_DIRECTORY__", escape(str(frames))))
-        env = {**os.environ, "LIBGL_ALWAYS_SOFTWARE": "1", "DISPLAY": ""}
+        env = {
+            **os.environ,
+            "LIBGL_ALWAYS_SOFTWARE": "1",
+            "DISPLAY": "",
+            "GZ_PARTITION": "livingproof_" + uuid.uuid4().hex,
+        }
         processes = []
 
         def interrupt(number, _frame):
@@ -54,16 +60,20 @@ def capture(output: Path, deadline: float):
                         start_new_session=True,
                     )
                 )
-                processes.append(
-                    subprocess.Popen(
+
+                def subscribe():
+                    return subprocess.Popen(
                         ["gz", "topic", "-e", "-t", topic],
                         stdout=null,
-                        stderr=null,
+                        stderr=log,
                         env=env,
                         start_new_session=True,
                     )
-                )
+
+                processes.append(subscribe())
                 while time.monotonic() < deadline:
+                    if processes[1].poll() is not None:
+                        processes[1] = subscribe()
                     images = list(frames.glob("*.png"))
                     if images and images[0].stat().st_size > 0:
                         # ImageSaver writes synchronously; wait briefly for the write to finish.
