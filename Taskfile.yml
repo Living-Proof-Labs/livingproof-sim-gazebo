@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Adapted from collaboration-guidelines v6.0.0 templates/container/Taskfile.yml.
+version: '3'
+tasks:
+  default:
+    desc: List commands
+    cmds: [task --list]
+  setup:
+    desc: Install locked dependencies
+    cmds: [bash tools/run-task.sh setup]
+  check:
+    desc: Run static checks
+    cmds: [bash tools/run-task.sh check]
+  test:
+    desc: Run native engine tests
+    cmds: [bash tools/run-task.sh test]
+  verify:
+    desc: Run checks and tests
+    cmds: [bash tools/run-task.sh verify]
+  package:
+    desc: Build Python distributions
+    cmds: [bash tools/run-task.sh package]
+  docs:reference:
+    desc: Refresh generated command reference
+    cmds: [bash tools/run-task.sh docs:reference]
+  docs:
+    desc: Build the browsable manual
+    cmds: [bash tools/run-task.sh docs]
+  smoke:
+    desc: Test the built wheel outside the checkout
+    cmds: [bash tools/run-task.sh smoke]

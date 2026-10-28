@@ -1,0 +1,29 @@
+services:
+  tooling:
+    build:
+      context: .
+      target: development
+      secrets:
+        - ca
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /workspace/gazebo
+    environment:
+      SSL_CERT_FILE: /run/secrets/ca
+      HTTP_PROXY: "${HTTP_PROXY:-}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      NO_PROXY: "${NO_PROXY:-}"
+      http_proxy: "${http_proxy:-}"
+      https_proxy: "${https_proxy:-}"
+      no_proxy: "${no_proxy:-}"
+    secrets:
+      - ca
+    volumes:
+      - .:/workspace/gazebo
+      - gazebo-venv:/opt/gazebo-venv
+      - gazebo-cache:/opt/gazebo-cache
+volumes:
+  gazebo-venv:
+  gazebo-cache:
+secrets:
+  ca:
+    file: ./.build-secrets/ca.pem

@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling==1.27.0", "hatch-vcs==0.5.0", "livingproof-common @ https://github.com/Living-Proof-Labs/livingproof-common/releases/download/v1.0.0/livingproof_common-1.0.0-py3-none-any.whl"]
+build-backend = "hatchling.build"
+
+[project]
+name = "livingproof-sim-gazebo"
+dynamic = ["version"]
+description = "Bounded native Gazebo physics evidence"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+dependencies = ["livingproof-common @ https://github.com/Living-Proof-Labs/livingproof-common/releases/download/v1.0.0/livingproof_common-1.0.0-py3-none-any.whl"]
+
+[project.scripts]
+livingproof-sim-gazebo = "livingproof_sim_gazebo.cli:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[dependency-groups]
+dev = ["pytest==8.4.2", "ruff==0.14.2", "pillow==11.3.0", "zensical==0.0.73"]
+
+[tool.hatch.version]
+source = "vcs"
+[tool.hatch.version.raw-options]
+fallback_version = "0.0.0"
+local_scheme = "no-local-version"
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"

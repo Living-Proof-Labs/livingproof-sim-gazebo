@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: Apache-2.0
+# Adapted from collaboration-guidelines v6.0.0 templates/python/Taskfile.yml.
+version: '3'
+env:
+  UV_PYTHON_DOWNLOADS: never
+  UV_SYSTEM_CERTS: true
+tasks:
+  default:
+    desc: List prepared environment commands
+    cmds: [task -t Taskfile.runtime.yml --list]
+  setup:
+    desc: Install locked dependencies while exposing native Gazebo Python bindings
+    cmds:
+      - test -f "${UV_PROJECT_ENVIRONMENT:-.venv}/pyvenv.cfg" || uv venv --system-site-packages --python /usr/bin/python3 "${UV_PROJECT_ENVIRONMENT:-.venv}"
+      - uv sync --locked
+  check:
+    desc: Check Python lint and formatting
+    cmds:
+      - uv run --no-sync ruff check src tests
+      - uv run --no-sync ruff format --check src tests
+      - uv run --no-sync python tools/docs.py --check
+      - uv run --no-sync python tools/task_reference.py --check
+  test:
+    desc: Run native physics and CLI tests with individual JUnit results
+    cmds:
+      - mkdir -p artifacts
+      - uv run --no-sync pytest tests --junitxml=artifacts/tests.xml
+      - uv run --no-sync livingproof-sim-gazebo --steps 1000 --timeout 180 --output artifacts/trajectory.json --render-output artifacts/frame.png
+  verify:
+    desc: Run checks and tests
+    cmds:
+      - task: check
+      - task: test
+  package:
+    desc: Build Python wheel and source distribution (native Gazebo remains external)
+    cmds:
+      - rm -rf dist
+      - uv build
+  docs:reference:
+    desc: Refresh generated command reference
+    cmds:
+      - uv run --no-sync python tools/docs.py
+      - uv run --no-sync python tools/task_reference.py
+  docs:
+    desc: Build the browsable manual
+    cmds: [uv run --no-sync zensical build --clean]
+  smoke:
+    desc: Test the built wheel outside the checkout with native Gazebo
+    cmds: [uv run --no-sync python tools/smoke.py]
