@@ -20,4 +20,4 @@ volumes:
   gazebo-cache:
 secrets:
   ca:
-    file: "${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}"
+    file: ./.cache/build-ca.pem
