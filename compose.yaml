@@ -9,6 +9,12 @@ services:
     working_dir: /workspace/gazebo
     environment:
       SSL_CERT_FILE: /run/secrets/ca
+      HTTP_PROXY: "${HTTP_PROXY:-}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      NO_PROXY: "${NO_PROXY:-}"
+      http_proxy: "${http_proxy:-}"
+      https_proxy: "${https_proxy:-}"
+      no_proxy: "${no_proxy:-}"
     secrets:
       - ca
     volumes:
@@ -20,4 +26,4 @@ volumes:
   gazebo-cache:
 secrets:
   ca:
-    file: ./.cache/build-ca.pem
+    file: ./.build-secrets/ca.pem

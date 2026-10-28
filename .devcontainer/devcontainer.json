@@ -5,6 +5,6 @@
   "workspaceFolder": "/workspace/gazebo",
   "remoteUser": "vscode",
   "overrideCommand": true,
-  "initializeCommand": "mkdir -p .cache && cp \"${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}\" .cache/build-ca.pem && chmod 644 .cache/build-ca.pem",
+  "initializeCommand": "mkdir -p .build-secrets && cp \"${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}\" .build-secrets/ca.pem && chmod 644 .build-secrets/ca.pem",
   "postCreateCommand": "task setup"
 }

@@ -8,9 +8,9 @@ if ! command -v docker >/dev/null; then
   echo 'Host tasks require Docker. Use a prepared development container for task setup.' >&2
   exit 1
 fi
-mkdir -p .cache
-cp "${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" .cache/build-ca.pem
-chmod 644 .cache/build-ca.pem
-args=(compose run --rm)
+mkdir -p .build-secrets
+cp "${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" .build-secrets/ca.pem
+chmod 644 .build-secrets/ca.pem
+args=(compose run --rm -e HOME=/tmp)
 [[ $1 != setup ]] || args+=(--build)
 exec docker "${args[@]}" tooling task -t Taskfile.runtime.yml "$@"
