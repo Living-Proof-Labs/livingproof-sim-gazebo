@@ -1,0 +1,9 @@
+{
+  "name": "Gazebo development",
+  "dockerComposeFile": "../compose.yaml",
+  "service": "tooling",
+  "workspaceFolder": "/workspace/gazebo",
+  "remoteUser": "vscode",
+  "overrideCommand": true,
+  "postCreateCommand": "task setup"
+}

@@ -1,0 +1,72 @@
+name: Gazebo verification
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e
+        with:
+          version: '3.54.0'
+      - name: Match checkout ownership
+        run: |
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
+      - run: task setup
+      - name: Verify development container without Docker inside
+        run: |
+          npm install --prefix "$RUNNER_TEMP/devcontainer-cli" @devcontainers/cli@0.89.0
+          export PATH="$RUNNER_TEMP/devcontainer-cli/node_modules/.bin:$PATH"
+          bash tools/test-devcontainer.sh
+      - run: task verify
+      - run: task docs
+      - run: task package
+      - run: task smoke
+      - uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a
+        if: ${{ !cancelled() }}
+        with:
+          name: Gazebo tests (amd64)
+          path: artifacts/*.xml
+          reporter: python-xunit
+          use-actions-summary: 'true'
+          collapsed: never
+          fail-on-error: 'true'
+          fail-on-empty: 'true'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: gazebo-evidence-amd64
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ always() && hashFiles('dist/**') != '' }}
+        with:
+          name: gazebo-python-distributions
+          path: dist/
+          retention-days: 14
+  publish-tests:
+    needs: verify
+    if: ${{ !cancelled() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      checks: write
+    steps:
+      - uses: dorny/test-reporter@d1b5dff021aa968b288b02285a8bf47471c5928a
+        with:
+          name: Gazebo tests (amd64)
+          artifact: gazebo-evidence-amd64
+          path: '*.xml'
+          reporter: python-xunit
+          fail-on-error: 'true'
+          fail-on-empty: 'true'

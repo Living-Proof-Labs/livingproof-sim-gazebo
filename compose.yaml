@@ -1,0 +1,23 @@
+services:
+  tooling:
+    build:
+      context: .
+      target: development
+      secrets:
+        - ca
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /workspace/gazebo
+    environment:
+      SSL_CERT_FILE: /run/secrets/ca
+    secrets:
+      - ca
+    volumes:
+      - .:/workspace/gazebo
+      - gazebo-venv:/opt/gazebo-venv
+      - gazebo-cache:/opt/gazebo-cache
+volumes:
+  gazebo-venv:
+  gazebo-cache:
+secrets:
+  ca:
+    file: "${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}"
