@@ -118,3 +118,42 @@ def test_invalid_output_path():
     result = command("--steps", "1", "--output", "/dev/null/no-output.json")
     assert result.returncode == 2
     assert "Cannot write evidence" in result.stderr
+
+
+def test_colliding_output_paths_fail_before_engine_or_writes(tmp_path):
+    target = tmp_path / "evidence"
+    target.write_bytes(b"original evidence")
+    symlink = tmp_path / "symlink"
+    symlink.symlink_to(target)
+    directory_alias = tmp_path / "directory-alias"
+    directory_alias.symlink_to(tmp_path, target_is_directory=True)
+    hardlink = tmp_path / "hardlink"
+    os.link(target, hardlink)
+    cases = [
+        (target, target),
+        (target, tmp_path / "." / "evidence"),
+        (target, symlink),
+        (target, hardlink),
+        (tmp_path / "new-file", directory_alias / "new-file"),
+        (tmp_path / "new-file", tmp_path / "." / "new-file"),
+    ]
+    for trajectory, image in cases:
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "livingproof_sim_gazebo.cli",
+                "--output",
+                str(trajectory),
+                "--render-output",
+                str(image),
+            ],
+            env={**os.environ, "PATH": "/nonexistent"},
+            text=True,
+            capture_output=True,
+            timeout=10,
+        )
+        assert result.returncode == 2
+        assert "must name different files" in result.stderr
+        assert target.read_bytes() == b"original evidence"
+    assert not (tmp_path / "new-file").exists()

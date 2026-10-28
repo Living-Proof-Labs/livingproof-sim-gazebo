@@ -96,6 +96,24 @@ def parser():
 
 def main():
     args = parser().parse_args()
+    if args.output and args.render_output:
+        try:
+            collision = args.output.resolve() == args.render_output.resolve()
+            if not collision:
+                try:
+                    collision = os.path.samefile(args.output, args.render_output)
+                except FileNotFoundError:
+                    pass
+        except (OSError, RuntimeError) as exc:
+            print(f"Cannot resolve output paths: {exc}", file=sys.stderr)
+            return 2
+        if collision:
+            print(
+                "--output and --render-output must name different files. "
+                "Try --output artifacts/trajectory.json --render-output artifacts/frame.png.",
+                file=sys.stderr,
+            )
+            return 2
     started = time.monotonic()
     try:
         metadata = identity(min(10, args.timeout))
