@@ -102,8 +102,12 @@ livingproof-sim-mujoco:
   - The physics step stays at **0.001 s** (dartsim).
   - The ball link world pose and velocity are sampled at the shared **500 Hz**, which is
     every 2nd step. `settings` records `physics_step`, `sample_rate` and `sample_stride`.
-  - Contacts are collected from a contact sensor on `/probe/contact`, as the union per
-    scenario.
+  - `reached_wall` and `non_floor_contacts` are computed from the position samples:
+    a box counts when the sphere surface comes within the distance tolerance of the loaded
+    world's box (axis-aligned bounding box). This is deterministic and does not depend on
+    timing.
+  - Contact-sensor messages on `/probe/contact` are not waited for. Whatever has arrived
+    is recorded as supplementary `contacts` data and never gates a result.
   - Geometry, rotation and place poses are read back from the loaded world: link
     axis-aligned bounding boxes and world poses.
 

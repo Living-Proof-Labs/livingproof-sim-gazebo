@@ -2,6 +2,7 @@
 """Pinned hallway-open fixture: checksums, SDF translation, UNSUPPORTED and hallways.md checks."""
 
 import copy
+from pathlib import Path
 import json
 import shutil
 import xml.etree.ElementTree as ET
@@ -324,3 +325,54 @@ def test_only_world_notes_release_are_vendored_and_generated_docs_skipped_on_pur
         hallway.FixtureError, match="files not vendored from release.json: world.svg"
     ):
         hallway.load_fixture(FIXTURE, VERSION, copy_root)
+
+
+WALLS = {
+    "floor": {"min": [-3.0, -1.0, -0.1], "max": [3.0, 1.0, 0.0]},
+    "wall-left": {"min": [-3.0, 0.5, 0.0], "max": [3.0, 0.6, 1.0]},
+    "wall-right": {"min": [-3.0, -0.6, 0.0], "max": [3.0, -0.5, 1.0]},
+}
+
+
+def _samples(ys, x=0.0, z=0.1):
+    return [{"t": i * 0.002, "x": x, "y": y, "z": z} for i, y in enumerate(ys)]
+
+
+def test_reach_is_computed_from_position_samples_only():
+    # Pure geometry, no simulator, no clock: same input always gives the same answer.
+    r, tol = 0.1, 0.01
+    assert hallway.boxes_reached(_samples([0.0, 0.2, 0.395]), WALLS, r, tol) == [
+        "wall-left"
+    ]
+    assert hallway.boxes_reached(_samples([0.0, -0.2, -0.4]), WALLS, r, tol) == [
+        "wall-right"
+    ]
+    assert hallway.boxes_reached(_samples([0.0, 0.2, 0.38]), WALLS, r, tol) == []
+    # Floor is ignored even though the sphere rests on it.
+    assert hallway.boxes_reached(_samples([0.0], z=0.1), WALLS, r, tol) == []
+
+
+def test_worker_does_not_wait_on_wall_clock():
+    src = Path(hallway.__file__).with_name("_hallway_worker.py").read_text()
+    assert "time.sleep" not in src and "import time" not in src
+
+
+def test_missing_contact_messages_do_not_change_the_verdict(monkeypatch, loaded):
+    # Simulates a slow runner that delivers no contact messages at all.
+    real = hallway._worker
+
+    def no_contacts(sdf, scenario, *a, **k):
+        out = real(sdf, scenario, *a, **k)
+        if "contacts" in out:
+            out["contacts"] = []
+        return out
+
+    monkeypatch.setattr(hallway, "_worker", no_contacts)
+    out, notes = hallway.collision_checks(loaded["world"], loaded["extension"])
+    gated = {
+        q["name"]: q["pass"]
+        for q in out
+        if q["name"].endswith(("reached_wall", "non_floor_contacts"))
+    }
+    assert len(gated) == 4 and all(gated.values()), gated
+    assert notes["contacts_gating"] is False

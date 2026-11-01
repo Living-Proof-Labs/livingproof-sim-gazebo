@@ -596,6 +596,30 @@ def measure_geometry(read: dict, world: dict) -> list[dict]:
     return out
 
 
+def boxes_reached(
+    samples: list[dict], boxes: dict, radius: float, tol: float, skip=("floor",)
+) -> list[str]:
+    """Names of boxes whose surface the sphere came within ``tol`` of, from position samples.
+
+    Deterministic: uses only the sampled probe centre and the loaded world's axis-aligned
+    boxes, never contact messages, so it cannot depend on wall-clock timing.
+    """
+    hit = set()
+    for name, box in boxes.items():
+        if name in skip:
+            continue
+        lo, hi = box["min"], box["max"]
+        for s in samples:
+            c = (s["x"], s["y"], s["z"])
+            d = math.sqrt(
+                sum(max(lo[i] - c[i], 0.0, c[i] - hi[i]) ** 2 for i in range(3))
+            )
+            if d - radius <= tol:
+                hit.add(name)
+                break
+    return sorted(hit)
+
+
 def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
     tol = world["tolerances"]["distance_m"]
     pr, shared = extension["probe"], contract.probe()
@@ -645,6 +669,15 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
         )
         for r in plan
     }
+    # The reset's first server reads the loaded world back before driving; its boxes are
+    # the reference for the position-based reach checks below.
+    reset_run = {
+        "reset": {"speed": speed, "seconds": wall_s},
+        "markers": [m for m, _, _ in place_points(world)],
+        "dt": dt,
+    }
+    driven = _worker(sdf, reset_run)
+    boxes = driven["before"]["boxes"]
     drop = runs["floor"]["samples"]
     out.append(
         quantity(
@@ -670,7 +703,7 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
     )
     for sign, label in ((1, "+y"), (-1, "-y")):
         push = runs[label]["samples"]
-        touched = sorted(set(runs[label]["contacts"]) - {"floor"})
+        touched = boxes_reached(push, boxes, r, tol)
         max_speed = max(abs(s["vy"]) for s in push)
         out.append(
             quantity(
@@ -703,15 +736,16 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
                     1.0 if touched else 0.0,
                     0.0,
                     "bool",
-                    "probe contacted a wall collision",
+                    "from position samples: sphere surface came within the distance "
+                    "tolerance of a wall box (AABB of the loaded world)",
                 ),
-                "contacts": touched,
+                "reached": touched,
+                "contacts": runs[label]["contacts"],
             }
         )
     for end, target in ends:
         run = runs[end]["samples"]
-        touched = sorted(runs[end]["contacts"])
-        others = [c for c in touched if c != "floor"]
+        others = boxes_reached(run, boxes, r, tol)
         out.append(
             quantity(
                 f"collision/open_end/{end}/final_x",
@@ -732,9 +766,11 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
                     float(len(others)),
                     0.0,
                     "count",
-                    "distinct non-floor collisions contacted",
+                    "from position samples: distinct non-floor boxes the sphere surface "
+                    "came within the distance tolerance of",
                 ),
-                "contacts": touched,
+                "reached": others,
+                "contacts": runs[end]["contacts"],
             }
         )
         out.append(
@@ -752,12 +788,6 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
     # returns false and a WorldControl reset.all request stops the server stepping. So the
     # reset is a reload: server 1 reads the world back and drives the probe; server 2 loads
     # the same SDF, and its readback must match server 1's with the probe back at the start.
-    reset_run = {
-        "reset": {"speed": speed, "seconds": wall_s},
-        "markers": [m for m, _, _ in place_points(world)],
-        "dt": dt,
-    }
-    driven = _worker(sdf, reset_run)
     reloaded = _worker(sdf, {**reset_run, "reset": {"speed": 0.0, "seconds": 0.0}})
     reset = {
         "before": driven["before"],
@@ -770,13 +800,14 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
         "floor_contacts": runs["floor"]["contacts"],
         "gravity": [float(v) for v in extension["physics"]["gravity"]],
         "contacts_enabled": True,
+        "contacts_gating": False,
         "physics_engine": extension["physics"]["engine"],
         "timestep": step,
         **sampling,
         "sampling_hz": sampling["sample_rate"],
         "drive_method": f"{pr['drive']}, |command| <= {speed} m/s (proportional 10/s toward a target), "
         f"joint effort limit {pr['effort_limit']} N; no teleporting",
-        "measurement_method": "ball link world pose and velocity sampled at sample_rate (every sample_stride-th physics step); contacts are the union of contact-sensor messages per scenario",
+        "measurement_method": "ball link world pose and velocity sampled at sample_rate (every sample_stride-th physics step); reached_wall and non_floor_contacts are computed from those position samples against the loaded world's boxes; contact-sensor messages are not waited for and are recorded only as supplementary, non-gating data",
         "probe": {
             **shared["probe"],
             "density": pr["density"],

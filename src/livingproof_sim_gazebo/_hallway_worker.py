@@ -221,9 +221,7 @@ def main():
             raise RuntimeError("loaded world returned no bounding boxes")
         print(json.dumps(state["read"]))
         return
-    import time
-
-    time.sleep(0.5)  # let the last contact messages arrive
+    # No wall-clock wait for contact messages: whatever has arrived is supplementary only.
     with lock:
         found = sorted(contacts)
     print(json.dumps({"samples": state["samples"], "contacts": found, "steps": steps}))
