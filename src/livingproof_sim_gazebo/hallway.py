@@ -16,8 +16,10 @@ import sys
 import tempfile
 from xml.sax.saxutils import escape, quoteattr
 
+from livingproof_sim_gazebo import contract
+
 WORLDS = Path(__file__).parent / "worlds"
-RESULT_FORMAT = "livingproof-world-result/0.1"
+RESULT_FORMAT = contract.RESULT_FORMAT
 SUPPORTED_FORMAT = "livingproof-world/0.1"
 GEOMETRY_KEYS = {"name", "type", "role", "centre", "size"}
 PLACE_KEYS = {
@@ -186,8 +188,33 @@ def supported(world: dict, extension: dict) -> None:
         raise Unsupported(
             fid, ver, f"physics engine {extension['physics'].get('engine')!r}"
         )
-    if extension["probe"].get("radius") != 0.1:
-        raise Unsupported(fid, ver, "probe radius other than the 0.10 m in hallways.md")
+    # The shared hallway-probe.json is the source of the probe; the extension may only agree.
+    shared, pp = contract.probe(), contract.probe()["probe"]
+    try:
+        contract.sampling(extension["physics"].get("max_step_size"))
+    except (contract.ContractError, TypeError) as exc:
+        raise Unsupported(fid, ver, f"extension physics.max_step_size: {exc}") from None
+    for key, have, want in (
+        ("probe.radius", extension["probe"].get("radius"), pp["radius_m"]),
+        ("probe.density", extension["probe"].get("density"), pp["density_kg_per_m3"]),
+        ("probe.mu", extension["probe"].get("mu"), pp["friction"]),
+        (
+            "probe.max_speed",
+            extension["probe"].get("max_speed"),
+            pp["max_speed_m_per_s"],
+        ),
+        (
+            "physics.gravity",
+            [float(v) for v in extension["physics"].get("gravity", [])],
+            shared["gravity_m_per_s2"],
+        ),
+    ):
+        if have != want:
+            raise Unsupported(
+                fid,
+                ver,
+                f"extension {key} = {have!r} contradicts hallway-probe.json ({want!r})",
+            )
 
 
 def _v(values) -> str:
@@ -338,18 +365,13 @@ def sdf_check(path: Path) -> dict:
 
 
 def quantity(name, kind, canonical, measured, tolerance, unit, method):
-    deviation = None if measured is None else measured - canonical
-    return {
-        "name": name,
-        "kind": kind,
-        "unit": unit,
-        "canonical": canonical,
-        "measured": measured,
-        "deviation": deviation,
-        "tolerance": tolerance,
-        "pass": deviation is not None and abs(deviation) <= tolerance + 1e-12,
-        "method": method,
-    }
+    """One shared-contract quantity; kind, unit and comparison come from the contract."""
+    q = contract.quantity(name, canonical, measured, tolerance, method)
+    if (q["kind"], q["unit"]) != (kind, unit):
+        raise contract.ContractError(
+            f"{name}: adapter says {kind}/{unit}, contract says {q['kind']}/{q['unit']}"
+        )
+    return q
 
 
 def _worker(sdf: str, scenario: dict, timeout: float = 300) -> dict:
@@ -576,35 +598,53 @@ def measure_geometry(read: dict, world: dict) -> list[dict]:
 
 def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
     tol = world["tolerances"]["distance_m"]
-    pr = extension["probe"]
-    r, speed = pr["radius"], pr["max_speed"]
+    pr, shared = extension["probe"], contract.probe()
+    checks = shared["checks"]
+    r, speed = shared["probe"]["radius_m"], shared["probe"]["max_speed_m_per_s"]
+    start = [0.0, 0.0, checks["floor"]["start_z_m"]]
     half = world["dimensions"]["clear_width"] / 2
-    sdf = to_sdf(world, extension, probe=[0.0, 0.0, 0.75])
+    sdf = to_sdf(world, extension, probe=start)
     out = []
     dt = extension["physics"]["max_step_size"]
+    sampling = contract.sampling(
+        dt
+    )  # 0.001 s physics step, every 2nd step sampled = 500 Hz
+    wall_s, wall_settle = checks["wall"]["drive_s"], checks["wall"]["settle_s"]
+    ends = list(zip(("+x", "-x"), checks["open_end"]["targets_x_m"]))
     plan = [
-        {"name": "floor", "settle": 2.0, "axis": None},
-        {"name": "+y", "settle": 1.5, "axis": "y", "speed": speed, "seconds": 5.0},
-        {"name": "-y", "settle": 1.5, "axis": "y", "speed": -speed, "seconds": 5.0},
+        {"name": "floor", "settle": checks["floor"]["settle_s"], "axis": None},
         {
-            "name": "+2.80",
-            "settle": 1.5,
-            "axis": "x",
-            "target": 2.8,
+            "name": "+y",
+            "settle": wall_settle,
+            "axis": "y",
             "speed": speed,
-            "seconds": 16.0,
+            "seconds": wall_s,
         },
         {
-            "name": "-2.80",
-            "settle": 1.5,
-            "axis": "x",
-            "target": -2.8,
-            "speed": speed,
-            "seconds": 16.0,
+            "name": "-y",
+            "settle": wall_settle,
+            "axis": "y",
+            "speed": -speed,
+            "seconds": wall_s,
         },
+    ] + [
+        {
+            "name": end,
+            "settle": checks["open_end"]["settle_s"],
+            "axis": "x",
+            "target": target,
+            "speed": speed,
+            "seconds": checks["open_end"]["drive_s"],
+        }
+        for end, target in ends
     ]
     # A fresh server per scenario is the reset: geometry, frame and initial state are reloaded.
-    runs = {r["name"]: _worker(sdf, {"run": r, "dt": dt}) for r in plan}
+    runs = {
+        r["name"]: _worker(
+            sdf, {"run": r, "dt": dt, "stride": sampling["sample_stride"]}
+        )
+        for r in plan
+    }
     drop = runs["floor"]["samples"]
     out.append(
         quantity(
@@ -644,19 +684,15 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
             )
         )
         out.append(
-            {
-                **quantity(
-                    f"collision/wall{label}/max_speed",
-                    "drive",
-                    speed,
-                    max_speed,
-                    0.0,
-                    "m/s",
-                    "max |vy| over steps; must not exceed the drive limit",
-                ),
-                "deviation": max_speed - speed,
-                "pass": max_speed <= speed + 1e-9,
-            }
+            quantity(
+                f"collision/wall{label}/max_speed",
+                "drive",
+                speed,
+                max_speed,
+                0.0,
+                "m/s",
+                "max |vy| over steps; must not exceed the drive limit",
+            )
         )
         out.append(
             {
@@ -672,13 +708,13 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
                 "contacts": touched,
             }
         )
-    for target in (2.8, -2.8):
-        run = runs[f"{target:+.2f}"]["samples"]
-        touched = sorted(runs[f"{target:+.2f}"]["contacts"])
+    for end, target in ends:
+        run = runs[end]["samples"]
+        touched = sorted(runs[end]["contacts"])
         others = [c for c in touched if c != "floor"]
         out.append(
             quantity(
-                f"collision/open_end/{target:+.2f}/final_x",
+                f"collision/open_end/{end}/final_x",
                 "collision",
                 target,
                 run[-1]["x"],
@@ -690,7 +726,7 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
         out.append(
             {
                 **quantity(
-                    f"collision/open_end/{target:+.2f}/non_floor_contacts",
+                    f"collision/open_end/{end}/non_floor_contacts",
                     "collision",
                     0.0,
                     float(len(others)),
@@ -703,7 +739,7 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
         )
         out.append(
             quantity(
-                f"collision/open_end/{target:+.2f}/max_abs_y",
+                f"collision/open_end/{end}/max_abs_y",
                 "collision",
                 0.0,
                 max(abs(s["y"]) for s in run),
@@ -712,6 +748,23 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
                 "max |y| during the drive",
             )
         )
+    # Reset (hallways.md). Gazebo Sim 8 + dartsim cannot reset in-process: Server.reset_all()
+    # returns false and a WorldControl reset.all request stops the server stepping. So the
+    # reset is a reload: server 1 reads the world back and drives the probe; server 2 loads
+    # the same SDF, and its readback must match server 1's with the probe back at the start.
+    reset_run = {
+        "reset": {"speed": speed, "seconds": wall_s},
+        "markers": [m for m, _, _ in place_points(world)],
+        "dt": dt,
+    }
+    driven = _worker(sdf, reset_run)
+    reloaded = _worker(sdf, {**reset_run, "reset": {"speed": 0.0, "seconds": 0.0}})
+    reset = {
+        "before": driven["before"],
+        "after": reloaded["before"],
+        "moved_x": driven["moved_x"],
+    }
+    out += reset_checks(reset["before"], reset["after"], start, tol)
     step = extension["physics"]["max_step_size"]
     notes = {
         "floor_contacts": runs["floor"]["contacts"],
@@ -719,43 +772,86 @@ def collision_checks(world: dict, extension: dict) -> tuple[list[dict], dict]:
         "contacts_enabled": True,
         "physics_engine": extension["physics"]["engine"],
         "timestep": step,
-        "sampling_hz": round(1.0 / step, 6),
+        **sampling,
+        "sampling_hz": sampling["sample_rate"],
         "drive_method": f"{pr['drive']}, |command| <= {speed} m/s (proportional 10/s toward a target), "
         f"joint effort limit {pr['effort_limit']} N; no teleporting",
-        "measurement_method": "ball link world pose and velocity sampled every physics step; contacts are the union of contact-sensor messages per scenario",
+        "measurement_method": "ball link world pose and velocity sampled at sample_rate (every sample_stride-th physics step); contacts are the union of contact-sensor messages per scenario",
         "probe": {
-            "radius": r,
+            **shared["probe"],
             "density": pr["density"],
-            "mu": pr["mu"],
-            "joints": "x, y, z prismatic (sliding, no rotation)",
+            "source": "hallway-probe.json (shared contract)",
         },
+        "reset_method": "reload of the same SDF in a fresh server (in-process reset_all / "
+        "WorldControl reset is unavailable with dartsim in Gazebo Sim 8); "
+        f"probe moved {reset['moved_x']:.3f} m in x before the reset",
     }
     return out, notes
 
 
-def adapter_commit() -> str | None:
-    """Full 40-character commit of this checkout, or None outside a git checkout."""
-    root = Path(__file__).resolve().parents[2]
-    if not (root / ".git").exists() or not (root / "pyproject.toml").is_file():
-        return None
-    try:
-        done = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            timeout=10,
+def reset_checks(
+    before: dict, after: dict, start: list[float], tol: float
+) -> list[dict]:
+    """reset/* quantities: geometry and places unchanged, probe back at its start."""
+
+    def shift(a, b):
+        return max(abs(x - y) for x, y in zip(a, b))
+
+    def box(read, n):
+        return read["boxes"][n]["min"] + read["boxes"][n]["max"]
+
+    out = [
+        quantity(
+            f"reset/geometry/{n}/max_shift",
+            "reset",
+            0.0,
+            shift(box(before, n), box(after, n)),
+            tol,
+            "m",
+            "max |change| of the world axis-aligned box corners, before the runs vs after reset",
         )
-    except OSError:
-        return None
-    sha = done.stdout.strip()
-    return sha if done.returncode == 0 and len(sha) == 40 else None
+        for n in sorted(before["boxes"])
+    ]
+    out.append(
+        quantity(
+            "reset/places/max_shift",
+            "reset",
+            0.0,
+            max(
+                shift(before["places"][n]["xyz"], after["places"][n]["xyz"])
+                for n in before["places"]
+            ),
+            tol,
+            "m",
+            "max |change| of any place marker, before the runs vs after reset",
+        )
+    )
+    out += [
+        quantity(
+            f"reset/probe/{a}",
+            "reset",
+            c,
+            v,
+            tol,
+            "m",
+            "probe centre on the first step after reset; start is spawn-centre at start_z_m",
+        )
+        for a, c, v in zip("xyz", start, after["probe"])
+    ]
+    return out
 
 
 def adapter_identity() -> dict:
     from livingproof_sim_gazebo.cli import identity
 
     ident = identity()
-    return {"name": "livingproof-sim-gazebo", **ident, "commit": adapter_commit()}
+    return contract.adapter(
+        "livingproof-sim-gazebo",
+        Path(__file__).resolve().parent,
+        ident["version"],
+        ident["provenance"],
+        package_version=ident.get("package_version"),
+    )
 
 
 def base_record(world: dict, pin: dict, fixture: str, content_version: str) -> dict:
@@ -787,7 +883,7 @@ def base_record(world: dict, pin: dict, fixture: str, content_version: str) -> d
 def run_checks(
     fixture: str, content_version: str, root: Path = WORLDS, loaded: dict | None = None
 ) -> dict:
-    """Return one engine-neutral result record (docs/hallway-result.schema.json)."""
+    """Return one engine-neutral result record (shared livingproof-world-result/0.2)."""
     loaded = loaded or load_fixture(fixture, content_version, root)
     world, extension, pin = loaded["world"], loaded["extension"], loaded["pin"]
     base = base_record(world, pin, fixture, content_version)

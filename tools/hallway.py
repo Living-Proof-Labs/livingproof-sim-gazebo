@@ -130,6 +130,9 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
     loaded = hallway.load_fixture("hallway-open", "0.1.0")
     record = hallway.run_checks("hallway-open", "0.1.0", loaded=loaded)
+    from livingproof_sim_gazebo import contract
+
+    contract.validate(record)  # shared 0.2 schema + required names, before writing
     (out / "result.json").write_text(json.dumps(record, indent=2) + "\n")
     (out / "world.sdf").write_text(hallway.to_sdf(loaded["world"], loaded["extension"]))
     shots = capture(loaded["world"], loaded["extension"], out)

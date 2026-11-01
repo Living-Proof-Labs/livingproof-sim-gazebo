@@ -3,19 +3,14 @@
 
 import copy
 import json
-from pathlib import Path
-import re
 import shutil
 import xml.etree.ElementTree as ET
 
-import jsonschema
 import pytest
 
-from livingproof_sim_gazebo import hallway
+from livingproof_sim_gazebo import contract, hallway
 
 FIXTURE, VERSION = "hallway-open", "0.1.0"
-SCHEMA = json.loads(Path("docs/hallway-result.schema.json").read_text())
-MUJOCO = json.loads(Path("tests/data/mujoco-quantity-names.json").read_text())
 
 
 @pytest.fixture(scope="module")
@@ -195,7 +190,29 @@ def test_unmapped_world_feature_is_unsupported(loaded, edit, feature):
         (lambda e: e["physics"].update(engine="bullet"), "physics engine 'bullet'"),
         (
             lambda e: e["probe"].update(radius=0.2),
-            "probe radius other than the 0.10 m in hallways.md",
+            "extension probe.radius = 0.2 contradicts hallway-probe.json (0.1)",
+        ),
+        (
+            lambda e: e["probe"].update(mu=0.3),
+            "extension probe.mu = 0.3 contradicts hallway-probe.json (0.1)",
+        ),
+        (
+            lambda e: e["probe"].update(max_speed=0.5),
+            "extension probe.max_speed = 0.5 contradicts hallway-probe.json (0.25)",
+        ),
+        (
+            lambda e: e["probe"].update(density=500.0),
+            "extension probe.density = 500.0 contradicts hallway-probe.json (1000.0)",
+        ),
+        (
+            lambda e: e["physics"].update(gravity=[0.0, 0.0, -9.8]),
+            "extension physics.gravity = [0.0, 0.0, -9.8] contradicts hallway-probe.json "
+            "([0.0, 0.0, -9.81])",
+        ),
+        (
+            lambda e: e["physics"].update(max_step_size=0.003),
+            "extension physics.max_step_size: physics step 0.003 s does not divide the "
+            "500 Hz sample period",
         ),
         (
             lambda e: e.update(content_version="0.2.0"),
@@ -223,40 +240,27 @@ def test_unsupported_record_keeps_fixture_object_and_validates(loaded):
     assert record["fixture"] == {"id": "hallway-open", "content_version": "0.1.0"}
     assert record["feature"].startswith("extension surface.min_depth = 0.002")
     assert record["quantities"] == []
-    jsonschema.validate(record, SCHEMA)
+    contract.validate(record)
 
 
-def test_schema_rejects_a_string_fixture_and_a_short_commit(result):
+def test_shared_schema_rejects_a_string_fixture_and_a_short_commit(result):
     bad = {**copy.deepcopy(result), "fixture": "hallway-open"}
-    with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(bad, SCHEMA)
+    with pytest.raises(contract.ContractError):
+        contract.validate(bad)
     bad = copy.deepcopy(result)
     bad["adapter"]["commit"] = "cc3dd22"
-    with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(bad, SCHEMA)
+    with pytest.raises(contract.ContractError):
+        contract.validate(bad)
 
 
-def test_adapter_commit_is_full_sha_like_catalog_commit_or_null(
-    result, monkeypatch, tmp_path
-):
-    pattern = re.compile(r"^[0-9a-f]{40}$")
-    assert pattern.match(result["catalog"]["commit"])
-    commit = result["adapter"]["commit"]
-    assert commit is None or pattern.match(commit)
-    if (Path(__file__).parents[1] / ".git").exists():
-        assert commit is not None
-    fake = tmp_path / "pkg" / "src" / "livingproof_sim_gazebo" / "hallway.py"
-    fake.parent.mkdir(parents=True)
-    monkeypatch.setattr(hallway, "__file__", str(fake))
-    assert hallway.adapter_commit() is None
+def test_quantity_names_are_the_shared_names(result):
+    names = {q["name"] for q in result["quantities"]}
+    assert contract.required_names() <= names
+    assert {n for n in names if not n.startswith("reset/")} <= set(contract.names())
 
 
-def test_quantity_names_match_mujoco(result):
-    assert sorted(q["name"] for q in result["quantities"]) == sorted(MUJOCO["names"])
-
-
-def test_result_matches_documented_schema(result):
-    jsonschema.validate(result, SCHEMA)
+def test_result_matches_shared_schema(result):
+    contract.validate(result)
     assert result["engine"]["name"] == "gazebo"
 
 
@@ -265,17 +269,34 @@ def test_all_hallways_md_quantities_pass(result):
     assert result["compile"]["status"] == "PASS"
     assert failed == []
     assert result["status"] == "PASS"
-    assert len(result["quantities"]) == 72
+    assert (
+        len(result["quantities"]) == 72 + 7
+    )  # 71 required, settled_bottom_z, 7 reset/*
 
 
-def test_probe_choices_match_mujoco(result):
+def test_probe_comes_from_shared_file(result):
     probe = result["settings"]["probe"]
-    assert (probe["radius"], probe["mu"]) == (0.1, 0.1)
-    assert "sliding" in probe["joints"]
+    assert (probe["radius_m"], probe["friction"]) == (0.1, 0.1)
+    assert probe["joints"] == ["slide-x", "slide-y", "slide-z"]
     speeds = [
         q["measured"] for q in result["quantities"] if q["name"].endswith("max_speed")
     ]
-    assert speeds and max(speeds) <= 0.25 + 1e-6
+    assert speeds and max(speeds) <= 0.25
+
+
+def test_sampling_keeps_0_001_physics_step_and_samples_every_second_step(result):
+    s = result["settings"]
+    assert (s["physics_step"], s["sample_rate"], s["sample_stride"]) == (0.001, 500, 2)
+    assert s["timestep"] == s["physics_step"]
+
+
+def test_worker_records_every_second_step_at_500_hz(loaded):
+    sdf = hallway.to_sdf(loaded["world"], loaded["extension"], probe=[0.0, 0.0, 0.75])
+    run = {"name": "floor", "settle": 0.1, "axis": None}
+    out = hallway._worker(sdf, {"run": run, "dt": 0.001, "stride": 2})
+    t = [s["t"] for s in out["samples"]]
+    assert out["steps"] == 100 and len(t) == 50
+    assert all(abs(b - a - 0.002) < 1e-9 for a, b in zip(t, t[1:]))
 
 
 def test_only_world_notes_release_are_vendored_and_generated_docs_skipped_on_purpose(
