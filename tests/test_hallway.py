@@ -76,7 +76,7 @@ def test_missing_and_unlisted_files_fail(copy_root):
     directory = copy_root / FIXTURE / VERSION
     (directory / "extra.txt").write_text("x")
     with pytest.raises(
-        hallway.FixtureError, match="files not in release.json: extra.txt"
+        hallway.FixtureError, match="files not vendored from release.json: extra.txt"
     ):
         hallway.load_fixture(FIXTURE, VERSION, copy_root)
     (directory / "extra.txt").unlink()
@@ -276,3 +276,30 @@ def test_probe_choices_match_mujoco(result):
         q["measured"] for q in result["quantities"] if q["name"].endswith("max_speed")
     ]
     assert speeds and max(speeds) <= 0.25 + 1e-6
+
+
+def test_only_world_notes_release_are_vendored_and_generated_docs_skipped_on_purpose(
+    copy_root,
+):
+    directory = copy_root / FIXTURE / VERSION
+    assert sorted(p.name for p in directory.iterdir()) == [
+        "notes.md",
+        "release.json",
+        "world.json",
+    ]
+    manifest = json.loads((directory / "release.json").read_text())
+    skipped = set(manifest["files"]) - hallway.VENDORED
+    # release.json lists the generated README and SVG renders; they are deliberately not vendored or checked.
+    assert (
+        skipped
+        == hallway.GENERATED_DOCS
+        == {"README.md", "world.svg", "world-light.svg", "world-dark.svg"}
+    )
+    hallway.load_fixture(FIXTURE, VERSION, copy_root)
+    (directory / "world.svg").write_text(
+        "<svg/>"
+    )  # a generated doc reappearing is still rejected
+    with pytest.raises(
+        hallway.FixtureError, match="files not vendored from release.json: world.svg"
+    ):
+        hallway.load_fixture(FIXTURE, VERSION, copy_root)

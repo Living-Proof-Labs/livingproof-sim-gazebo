@@ -2,11 +2,24 @@
 
 The adapter loads the released `hallway-open` 0.1.0 fixture from
 [livingproof-worlds](https://github.com/Living-Proof-Labs/livingproof-worlds) **v1.1.0**
-(`9b3e7119aa93a3370383227fb30bd39a9dd72b4b`). The seven released files are copied
-unchanged into `src/livingproof_sim_gazebo/worlds/hallway-open/0.1.0/`. Before every
-load, the adapter checks `release.json` against the pinned SHA-256 in `worlds/pins.json`
-and checks each file against `release.json`. A mismatch, a missing file or an unlisted
-file is an error. An unknown fixture or version is reported, never replaced by another.
+(`9b3e7119aa93a3370383227fb30bd39a9dd72b4b`). Only `world.json`, `notes.md` and `release.json` are vendored, unchanged, under
+`src/livingproof_sim_gazebo/worlds/hallway-open/0.1.0/`. `worlds/pins.json` records the tag, the full
+commit and the SHA-256 of `release.json`. On every load the adapter checks:
+
+- `release.json` against the pinned SHA-256;
+- `world.json` and `notes.md` against `release.json`.
+
+`release.json` also lists the generated docs (`README.md`, `world.svg`,
+`world-light.svg`, `world-dark.svg`). These are renders of `world.json`, so they are
+**skipped on purpose**: they are not vendored and not checksum-checked. A test states
+this. Loading fails with a `FixtureError` when:
+
+- a vendored file's checksum does not match;
+- a vendored file is missing;
+- any other file is present (including a generated doc);
+- `release.json` lists a file the adapter doesn't know.
+
+An unknown fixture or version is reported, never substituted.
 
 ```console
 $ task hallway   # writes artifacts/hallway/{result.json,world.sdf,overhead.png,entrance.png,screenshots.json}
@@ -81,11 +94,11 @@ when run outside a git checkout.
 `task hallway` renders two views with headless OGRE2 (`--headless-rendering`, software
 GL):
 
-- `overhead.png` looks straight down, with +x to the right.
-  - Gazebo Harmonic camera sensors have no orthographic projection: SDF `projection_type`
-    applies only to the GUI camera.
-  - Instead, the camera sits 60 m up with a 0.12 rad field of view. This is
-    near-orthographic: the tops of the 2.5 m walls appear about 4 % larger than the floor.
+- `overhead.png` looks straight down, with +x to the right. It is **near-orthographic,
+  not orthographic**. Gazebo Harmonic camera sensors have no orthographic mode: SDF
+  `projection_type` applies only to the GUI camera. So the camera sits **60 m** above the
+  floor with a **0.12 rad** horizontal field of view. As a result, the tops of the 2.5 m
+  walls (57.5 m from the camera) look about **4 % larger** than the floor.
 - `entrance.png` is a perspective view from behind the entrance, looking along +x.
 
 If rendering fails, `screenshots.json` marks the view `BLOCKED` with the server log tail.
