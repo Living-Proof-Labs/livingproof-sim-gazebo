@@ -43,6 +43,17 @@ commands:
  - bash tools/run-task.sh docs
 ```
 
+### `task hallway`
+
+```text
+task: hallway
+
+Write the hallway-open evidence bundle to artifacts/hallway
+
+commands:
+ - bash tools/run-task.sh hallway
+```
+
 ### `task package`
 
 ```text
@@ -157,6 +168,21 @@ env:
 
 commands:
  - uv run --no-sync zensical build --clean
+```
+
+### `task -t Taskfile.runtime.yml hallway`
+
+```text
+task: hallway
+
+Check hallway-open in Gazebo and write result.json, world.sdf and two screenshots
+
+env:
+  UV_PYTHON_DOWNLOADS: "never"
+  UV_SYSTEM_CERTS: "true"
+
+commands:
+ - uv run --no-sync python tools/hallway.py --output artifacts/hallway
 ```
 
 ### `task -t Taskfile.runtime.yml package`

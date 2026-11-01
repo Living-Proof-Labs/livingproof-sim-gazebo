@@ -17,6 +17,9 @@ tasks:
   verify:
     desc: Run checks and tests
     cmds: [bash tools/run-task.sh verify]
+  hallway:
+    desc: Write the hallway-open evidence bundle to artifacts/hallway
+    cmds: [bash tools/run-task.sh hallway]
   package:
     desc: Build Python distributions
     cmds: [bash tools/run-task.sh package]

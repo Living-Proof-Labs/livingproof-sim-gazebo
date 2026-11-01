@@ -31,6 +31,9 @@ tasks:
     cmds:
       - task: check
       - task: test
+  hallway:
+    desc: Check hallway-open in Gazebo and write result.json, world.sdf and two screenshots
+    cmds: [uv run --no-sync python tools/hallway.py --output artifacts/hallway]
   package:
     desc: Build Python wheel and source distribution (native Gazebo remains external)
     cmds:
