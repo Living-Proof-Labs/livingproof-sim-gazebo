@@ -17,7 +17,7 @@ livingproof-sim-gazebo = "livingproof_sim_gazebo.cli:main"
 allow-direct-references = true
 
 [dependency-groups]
-dev = ["pytest==8.4.2", "ruff==0.14.2", "pillow==11.3.0", "zensical==0.0.73"]
+dev = ["jsonschema==4.25.1", "pytest==8.4.2", "ruff==0.14.2", "pillow==11.3.0", "zensical==0.0.73"]
 
 [tool.hatch.version]
 source = "vcs"
