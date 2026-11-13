@@ -8,7 +8,7 @@ RUN --mount=type=secret,id=ca,required=false,mode=0444 set -eu; \
     chmod 644 /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg; \
     if [ -f /run/secrets/ca ]; then sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; export SSL_CERT_FILE=/run/secrets/ca; fi; \
     apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" update; \
-    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y ca-certificates=20260816ubuntu0.24.04.1 curl=8.5.0-2ubuntu10.16; \
+    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y ca-certificates=20260816ubuntu0.24.04.2 curl=8.5.0-2ubuntu10.16; \
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable noble main' > /etc/apt/sources.list.d/gazebo-stable.list; \
     apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" update; \
     DEBIAN_FRONTEND=noninteractive xargs -a /tmp/ubuntu-packages.lock apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y; \
