@@ -5,3 +5,10 @@ The Python wheel and source distribution contain the command, world and Python c
 `task setup`, `task check`, `task test`, and `task verify` run directly inside the prepared development container. On a Docker host they route through Compose. The test task publishes individual JUnit cases under `artifacts`. A finite headless capture writes a PNG and trajectory separately from any interactive viewer; no browser preview is included.
 
 The test is a physical engine check, not a robot capability PASS. Native engine support is tested on Ubuntu 24.04 amd64 only. Rendering depends on the OGRE2 and EGL software stack; a successful physics-only run does not prove rendering support.
+
+
+[Gazebo verification runs](https://github.com/Living-Proof-Labs/livingproof-sim-gazebo/actions/workflows/verify.yml)
+provide the actual pass/fail status and 14-day evidence artifacts for each revision.
+This manual does not embed or claim fresh native test outcomes. No measured line
+coverage report is generated. See [Version and source](version.md) to identify the
+documentation revision separately from package releases and test results.

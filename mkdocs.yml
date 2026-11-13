@@ -1,16 +1,36 @@
 site_name: Living Proof Labs — Gazebo
 site_url: https://docs.livingprooflabs.com/livingproof-sim-gazebo/
+repo_url: https://github.com/Living-Proof-Labs/livingproof-sim-gazebo
+repo_name: Source
+docs_dir: artifacts/docs-source
 use_directory_urls: false
 strict: true
 site_dir: artifacts/manual
 nav:
   - Documentation home: https://docs.livingprooflabs.com/
   - Start here: index.md
-  - Commands: command.md
-  - Hallway fixture: hallway.md
-  - Contributor tasks: tasks.md
+  - Guides:
+      - Hallway fixture: hallway.md
+  - Reference:
+      - Commands: command.md
+      - Tasks: tasks.md
   - Distribution and verification: verification.md
+  - Contribute: contribute.md
+  - Version and source: version.md
+  - Help / report an issue: https://github.com/Living-Proof-Labs/livingproof-sim-gazebo/issues
+  - License: https://github.com/Living-Proof-Labs/livingproof-sim-gazebo/blob/main/LICENSE
   - MuJoCo manual: https://docs.livingprooflabs.com/livingproof-sim-mujoco/
 theme:
   name: zensical
   font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+extra_css:
+  - assets/brand.css
