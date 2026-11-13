@@ -46,7 +46,7 @@ tasks:
       - uv run --no-sync python tools/task_reference.py
   docs:
     desc: Build the browsable manual
-    cmds: [uv run --no-sync zensical build --clean]
+    cmds: [uv run --no-sync python tools/build_manual.py]
   smoke:
     desc: Test the built wheel outside the checkout with native Gazebo
     cmds: [uv run --no-sync python tools/smoke.py]
