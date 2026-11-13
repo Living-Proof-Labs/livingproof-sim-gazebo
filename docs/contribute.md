@@ -29,7 +29,11 @@ Review output in `artifacts/manual/`; serve that directory with a static HTTP se
 The existing Gazebo verification workflow uploads only `artifacts/manual/` for
 Pages after all verification, packaging and smoke steps succeed on `main`.
 A separate deployment job uses the `github-pages` environment with Pages and
-identity-token write permissions; pull requests never deploy.
+identity-token write permissions; pull requests never deploy. Immediately before
+deployment, the job reads the current main ref through the GitHub API and refuses
+a stale workflow revision. API failures also stop deployment. The workflow-wide
+main concurrency group stays held through this check and deployment, so an old
+rerun cannot overwrite a newer deployment.
 
 Prerequisites: enable GitHub Pages with GitHub Actions as its source, allow the
 pinned Pages actions, and restrict the `github-pages` deployment environment to
