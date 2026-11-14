@@ -9,3 +9,12 @@ livingproof-sim-gazebo --steps 1000 --timeout 180 --output artifacts/trajectory.
 ```
 
 The camera path uses OGRE2, EGL, and software rendering. Physics alone does not require a graphics context. See the [command reference](command.md), [distribution and verification](verification.md), and [MuJoCo manual](https://docs.livingprooflabs.com/livingproof-sim-mujoco/).
+
+## First run from source
+
+Clone this repository, install Docker and Task 3.54.0 on the host, then run
+`task setup` and `task test`. The prepared container uses the pinned native engine
+and dependencies. A successful run writes individual JUnit results, trajectory JSON
+and a finite camera PNG under `artifacts/`; inspect those outputs before drawing
+conclusions. See [contributor tasks](tasks.md) for prepared-container commands and
+[verification](verification.md) for platform and rendering limits.

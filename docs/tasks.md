@@ -167,7 +167,7 @@ env:
   UV_SYSTEM_CERTS: "true"
 
 commands:
- - uv run --no-sync zensical build --clean
+ - uv run --no-sync python tools/build_manual.py
 ```
 
 ### `task -t Taskfile.runtime.yml hallway`
