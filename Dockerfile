@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 AS uv-tools
-FROM ubuntu:24.04@sha256:24737cef17f4e22b1977df7d9a05e77c4e28b7da5b8911f8d8ccda136bf3573c AS development
+FROM ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8 AS development
 COPY --from=uv-tools /uv /uvx /usr/local/bin/
 COPY tools/gazebo.gpg /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 COPY tools/ubuntu-packages.lock /tmp/ubuntu-packages.lock
