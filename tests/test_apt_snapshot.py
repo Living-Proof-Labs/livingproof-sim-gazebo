@@ -249,6 +249,36 @@ def test_check_snapshot_id_rejects_a_future_id_and_an_id_before_the_image(tmp_pa
     assert "UBUNTU_IMAGE_CREATED" in text
 
 
+def test_check_snapshot_id_rejects_malformed_and_boundary_ids():
+    """Format, calendar and created-date edges that the future/too-old test does not cover.
+
+    An ID equal to the image created timestamp is allowed (the guard is
+    older-than, not equal). Regex-valid but calendar-invalid IDs fail closed
+    through `date`.
+    """
+    created = "2026-11-10T08:36:35Z"
+    cases = (
+        ("20261118000000Z", created, 2, "bad snapshot id"),
+        ("20261118T000000z", created, 2, "bad snapshot id"),
+        ("2026-11-18T000000Z", created, 2, "bad snapshot id"),
+        ("20261118T000000Z", "20261110T083635Z", 2, "bad image created date"),
+        ("20261110T083635Z", created, 0, ""),
+        ("20261110T083634Z", created, 1, "older than the base image"),
+        ("20261131T000000Z", created, 1, "invalid date"),
+        ("20261118T250000Z", created, 1, "invalid date"),
+    )
+    for snapshot, image_created, expected, needle in cases:
+        result = subprocess.run(
+            ["bash", str(CHECK_ID), snapshot, image_created],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == expected, (snapshot, result.stderr)
+        if needle:
+            assert needle in result.stderr, (snapshot, result.stderr)
+
+
 def test_regenerate_script_fails_closed_and_uses_no_install_recommends():
     assert REGENERATE.is_file(), "tools/regenerate-ubuntu-lock.sh is missing"
     text = REGENERATE.read_text()
