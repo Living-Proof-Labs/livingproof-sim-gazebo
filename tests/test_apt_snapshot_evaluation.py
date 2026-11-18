@@ -133,13 +133,15 @@ def test_the_reproduction_script_treats_download_as_a_flag_not_a_workdir(tmp_pat
 
 
 def test_q3_states_the_closed_set_holds_only_with_no_install_recommends(text):
-    """The 933-closed-set figure is true only with --no-install-recommends.
+    """The 933-closed-set figure holds with --no-install-recommends, the chosen setting.
 
     Vera reproduced 19 extra Recommends on an empty status and 7 against the
     image when Recommends are left on, as the script and Dockerfile do.
     """
     q3 = _sections(text)[3]
     assert "--no-install-recommends" in q3
+    assert re.search(r"chosen setting", q3, flags=re.IGNORECASE)
+    assert "left open" not in q3
     assert "19" in q3
     assert re.search(r"\b7\b", q3)
     for package in (
