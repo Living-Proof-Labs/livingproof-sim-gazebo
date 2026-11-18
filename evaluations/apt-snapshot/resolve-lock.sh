@@ -15,10 +15,26 @@
 # resolve OSRF pins; it is not snapshotted and its signature is not checked here.
 set -euo pipefail
 SNAP=${1:?usage: resolve-lock.sh SNAPSHOT_ID [WORKDIR] [--download]}
-WORK=$(realpath -m "${2:-/tmp/apt-snapshot-eval}")
-DOWNLOAD=${3:-}
+shift
+WORK=/tmp/apt-snapshot-eval
+DOWNLOAD=
+for arg in "$@"; do
+  if [[ $arg == --download ]]; then
+    DOWNLOAD=--download
+  else
+    WORK=$arg
+  fi
+done
+WORK=$(realpath -m "$WORK")
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 [[ $SNAP =~ ^20[0-9]{6}T[0-9]{6}Z$ ]] || { echo "bad snapshot id: $SNAP" >&2; exit 2; }
+# A future ID is not a pin: snapshot.ubuntu.com silently serves the moving latest archive.
+python3 -c '
+import sys
+from datetime import datetime, timezone
+when = datetime.strptime(sys.argv[1], "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+raise SystemExit(0 if when < datetime.now(timezone.utc) else 1)
+' "$SNAP" || { echo "snapshot id is not in the past: $SNAP" >&2; exit 2; }
 
 mkdir -p "$WORK/img" "$WORK/apt/state/lists/partial" "$WORK/apt/cache/archives/partial"
 digest=$(sed -n 's/^FROM ubuntu:24.04@\(sha256:[0-9a-f]\{64\}\).*/\1/p' "$ROOT/Dockerfile" | head -1)

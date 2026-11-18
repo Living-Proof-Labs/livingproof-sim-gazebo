@@ -98,3 +98,34 @@ def test_the_reproduction_script_exists_and_parses():
 def test_this_evaluation_changes_no_build_input():
     dockerfile = (ROOT / "Dockerfile").read_text()
     assert "snapshot.ubuntu.com" not in dockerfile
+
+
+def test_the_reproduction_script_rejects_a_future_snapshot_id(tmp_path):
+    """A future ID must fail closed before any network call.
+
+    snapshot.ubuntu.com silently serves the moving latest archive for an ID
+    that is not in the past, so the script must refuse it.
+    """
+    result = subprocess.run(
+        ["bash", str(SCRIPT), "20990101T000000Z", str(tmp_path), "--download"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    assert result.returncode == 2, result.stderr
+    assert "not in the past" in result.stderr
+    assert not (tmp_path / "img").exists()
+
+
+def test_the_reproduction_script_treats_download_as_a_flag_not_a_workdir(tmp_path):
+    result = subprocess.run(
+        ["bash", str(SCRIPT), "20990101T000000Z", "--download"],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        cwd=tmp_path,
+    )
+    assert result.returncode == 2, result.stderr
+    assert "not in the past" in result.stderr
+    # --download must not be taken as the workdir path.
+    assert not (tmp_path / "--download").exists()
