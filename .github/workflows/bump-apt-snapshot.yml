@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: Apache-2.0
+# Second writer for Ubuntu apt snapshot bumps. snapshot.ubuntu.com has no
+# machine-readable catalog of IDs, so Mend-hosted Renovate cannot bump the
+# date cleanly. This workflow only opens a draft pull request through the
+# normal gate; it never writes to main.
+name: Propose an apt snapshot bump
+on:
+  schedule:
+    - cron: '17 7 * * 1'
+  workflow_dispatch:
+concurrency:
+  group: bump-apt-snapshot-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  bump:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: true
+      - name: Regenerate the lock at the latest 24 hours-old midnight snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_HOST: github.com
+        run: |
+          set -euo pipefail
+          if [[ ${GITHUB_REF} != refs/heads/main ]]; then
+            echo "refusing to run off main" >&2
+            exit 1
+          fi
+          ID=$(python3 -c '
+          from datetime import datetime, timedelta, timezone
+          cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+          midnight = cutoff.replace(hour=0, minute=0, second=0, microsecond=0)
+          print(midnight.strftime("%Y%m%dT%H%M%SZ"))
+          ')
+          echo "Proposed snapshot ID (latest 00:00:00Z at least 24 hours old): $ID"
+          bash tools/regenerate-ubuntu-lock.sh "$ID" --write --refresh
+          if git diff --quiet -- tools/ubuntu-packages.lock tools/ubuntu-snapshot.pin Dockerfile; then
+            echo "No lock or snapshot changes for $ID"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "apt-snapshot/${ID}"
+          git add tools/ubuntu-packages.lock tools/ubuntu-snapshot.pin Dockerfile
+          git commit -m "$(cat <<MSG
+          chore(deps): bump Ubuntu apt snapshot to ${ID}
+
+          This workflow is the second writer for apt snapshot bumps. Mend-hosted
+          Renovate remains the updater for other dependencies.
+          MSG
+          )"
+          git push -q origin "HEAD:apt-snapshot/${ID}"
+          if gh pr view "apt-snapshot/${ID}" --json number --jq .number >/dev/null 2>&1; then
+            echo "A pull request for apt-snapshot/${ID} already exists"
+            exit 0
+          fi
+          gh pr create --draft --base main --head "apt-snapshot/${ID}" \
+            --title "chore(deps): bump Ubuntu apt snapshot to ${ID}" \
+            --body "$(cat <<BODY
+          This workflow is the second writer for apt snapshot bumps. Mend-hosted Renovate remains the updater for other dependencies.
+
+          The proposed ID is the latest \`00:00:00Z\` snapshot at least 24 hours old. The lock was regenerated from that snapshot with \`--no-install-recommends\`. OSRF pins stay on the live index, with sha256 values recorded next to them.
+
+          Please review through the normal gate. This pull request must not be merged until verification passes on the exact head. The workflow never writes to \`main\`.
+
+          Note: pull requests opened with \`GITHUB_TOKEN\` may not start Actions until they are approved. An updater GitHub App, as used for the docs-brand second writer, would start CI automatically if one is later authorized for this repository.
+          BODY
+          )"

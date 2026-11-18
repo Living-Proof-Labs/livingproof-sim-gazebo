@@ -1,17 +1,36 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 AS uv-tools
 FROM ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8 AS development
+# UBUNTU_SNAPSHOT must match tools/ubuntu-snapshot.pin and the lock header.
+# ca-certificates is the one unpinned package: the base image has no CA bundle
+# and snapshot.ubuntu.com is https-only, so one live-archive install provides
+# the bundle before sources switch to the snapshot. The locked install then
+# pins the snapshot's ca-certificates. A public CA root is not vendored.
+ARG UBUNTU_SNAPSHOT=20261118T000000Z
+ARG UBUNTU_IMAGE_CREATED=2026-11-10T08:36:35Z
 COPY --from=uv-tools /uv /uvx /usr/local/bin/
 COPY tools/gazebo.gpg /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
 COPY tools/ubuntu-packages.lock /tmp/ubuntu-packages.lock
+COPY tools/check-snapshot-id.sh /tmp/check-snapshot-id.sh
 RUN --mount=type=secret,id=ca,required=false,mode=0444 set -eu; \
     chmod 644 /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg; \
+    chmod 755 /tmp/check-snapshot-id.sh; \
+    /tmp/check-snapshot-id.sh "$UBUNTU_SNAPSHOT" "$UBUNTU_IMAGE_CREATED"; \
     if [ -f /run/secrets/ca ]; then sed -i 's|http://|https://|g' /etc/apt/sources.list.d/ubuntu.sources; export SSL_CERT_FILE=/run/secrets/ca; fi; \
     apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" update; \
-    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y ca-certificates=20260816ubuntu0.24.04.2 curl=8.5.0-2ubuntu10.16; \
+    DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y ca-certificates; \
+    echo "unpinned live-archive ca-certificates: $(dpkg-query -W -f='${Version}' ca-certificates)"; \
+    printf '%s\n' \
+      'Types: deb' \
+      "URIs: https://snapshot.ubuntu.com/ubuntu/${UBUNTU_SNAPSHOT}/" \
+      'Suites: noble noble-updates noble-backports noble-security' \
+      'Components: main universe restricted multiverse' \
+      'Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg' \
+      > /etc/apt/sources.list.d/ubuntu.sources; \
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable noble main' > /etc/apt/sources.list.d/gazebo-stable.list; \
     apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" update; \
-    DEBIAN_FRONTEND=noninteractive xargs -a /tmp/ubuntu-packages.lock apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y; \
+    sed -i -e '/^#/d' -e 's/[[:space:]]sha256:[0-9a-f]*//' /tmp/ubuntu-packages.lock; \
+    DEBIAN_FRONTEND=noninteractive xargs -a /tmp/ubuntu-packages.lock apt-get -o Acquire::https::CaInfo="${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}" install -y --no-install-recommends; \
     rm -rf /var/lib/apt/lists/*
 ARG TASK_VERSION=3.54.0
 RUN --mount=type=secret,id=ca,required=false,mode=0444 set -eu; \
