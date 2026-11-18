@@ -9,6 +9,7 @@ a robot capability result, and ship the script that reproduces the lock test.
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from datetime import datetime, timezone
@@ -129,3 +130,81 @@ def test_the_reproduction_script_treats_download_as_a_flag_not_a_workdir(tmp_pat
     assert "not in the past" in result.stderr
     # --download must not be taken as the workdir path.
     assert not (tmp_path / "--download").exists()
+
+
+def test_q3_states_the_closed_set_holds_only_with_no_install_recommends(text):
+    """The 933-closed-set figure is true only with --no-install-recommends.
+
+    Vera reproduced 19 extra Recommends on an empty status and 7 against the
+    image when Recommends are left on, as the script and Dockerfile do.
+    """
+    q3 = _sections(text)[3]
+    assert "--no-install-recommends" in q3
+    assert "19" in q3
+    assert re.search(r"\b7\b", q3)
+    for package in (
+        "less",
+        "libcbor0.10",
+        "libfido2-1",
+        "libxmuu1",
+        "openssh-client",
+        "patch",
+        "xauth",
+    ):
+        assert package in q3
+
+
+def test_q4_osrf_group_counts_match_the_lock(text):
+    """Q4's per-library pin counts must match tools/ubuntu-packages.lock."""
+    pins = []
+    for line in (ROOT / "tools/ubuntu-packages.lock").read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            pins.append(line.split("=", 1)[0])
+    groups = {
+        "gz-sensors": 41,
+        "gz-common": 17,
+        "gz-physics": 14,
+        "gz-transport": 9,
+        "gz-rendering": 7,
+    }
+    q4 = _sections(text)[4]
+    for name, count in groups.items():
+        assert sum(name in pin for pin in pins) == count, name
+        assert re.search(rf"{re.escape(name)} {count}\b", q4), name
+
+
+def test_the_reproduction_script_fails_closed_when_apt_update_exits_without_an_err_line(
+    tmp_path,
+):
+    """apt-get update must fail the script even when it prints no Err/E: line."""
+    rootfs = tmp_path / "img" / "rootfs"
+    (rootfs / "var/lib/dpkg").mkdir(parents=True)
+    (rootfs / "var/lib/dpkg/status").write_text(
+        "Package: dummy\nStatus: install ok installed\n\n"
+    )
+    (rootfs / "usr/share/keyrings").mkdir(parents=True)
+    (rootfs / "usr/share/keyrings/ubuntu-archive-keyring.gpg").write_bytes(b"")
+
+    stub_dir = tmp_path / "bin"
+    stub_dir.mkdir()
+    stub = stub_dir / "apt-get"
+    stub.write_text(
+        "#!/bin/bash\necho 'Failed to fetch indexes (no details)'\nexit 1\n"
+    )
+    stub.chmod(0o755)
+
+    env = os.environ.copy()
+    env["PATH"] = f"{stub_dir}{os.pathsep}{env['PATH']}"
+    result = subprocess.run(
+        ["bash", str(SCRIPT), "20261101T000000Z", str(tmp_path)],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=env,
+    )
+    assert result.returncode == 1, result.stderr + result.stdout
+    assert "apt-get update failed" in result.stderr
+    # Must stop at update, not continue into lock resolution.
+    assert "lock does NOT resolve" not in result.stdout
+    assert not (tmp_path / "simulate.out").exists()
