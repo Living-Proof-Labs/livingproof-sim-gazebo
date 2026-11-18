@@ -1,6 +1,6 @@
 # livingproof-sim-gazebo
 
-A bounded, native Gazebo Harmonic physics and camera evidence slice for Living Proof Labs. **[Start here: documentation (source; publication pending)](docs/index.md)**. The companion [MuJoCo manual](https://docs.livingprooflabs.com/livingproof-sim-mujoco/) covers its separate engine implementation.
+A bounded, native Gazebo Harmonic physics and camera evidence slice for Living Proof Labs. **[Start here: Gazebo manual](https://docs.livingprooflabs.com/livingproof-sim-gazebo/)**. The companion [MuJoCo manual](https://docs.livingprooflabs.com/livingproof-sim-mujoco/) covers its separate engine implementation.
 
 ## Supported platform and native prerequisites
 
@@ -21,7 +21,7 @@ python3 -m venv --system-site-packages .venv
 
 ## How a release is published
 
-A push to `main` runs verification first. Only then does the shared semantic-release workflow run, and only if that push has releasable commits. It creates a draft release and tag. The `assemble` job checks out that tag, checks that the tag names the **same commit** verification just passed, then re-runs `task verify`, `task package`, and `task smoke` at the tag.
+A push to `main` runs verification first. After the entire verification workflow succeeds, a separate release workflow accepts only a same-repository push to `main` whose verified `head_sha` equals the release event’s `github.sha`. The shared release workflow checks out that event revision and asserts `HEAD == GITHUB_SHA` before releasing. If main has moved before the release event, the older verification is rejected; newer main must pass its own verification. A move after the event cannot change the checked-out revision. A draft is created only if that push has releasable commits. It creates a draft release and tag. The `assemble` job checks out that tag, checks that the tag names the **same commit** verification just passed, then re-runs `task verify`, `task package`, and `task smoke` at the tag.
 
 The wheel and sdist cannot be taken from the earlier `verify` job: this package uses `hatch-vcs`, so the version (and the filenames) come from the git tag, which does not exist until the draft is created. Rebuilding at that tag, after proving it names the verified commit, is how the published assets stay tied to the verified run. `SHA256SUMS` is generated from those rebuilt assets, attached to the draft with the wheel and sdist, and only then is the draft published. Tags are not retargeted, and a published release is not altered.
 
@@ -31,4 +31,4 @@ If `assemble` fails after the draft exists, the leftover draft stays **unpublish
 
 On a Docker host, run `task setup` then `task verify`. Inside the development container the same commands work without Docker. `task test` writes JUnit results and explicit finite trajectory and PNG evidence to `artifacts/`. See [distribution and verification](docs/verification.md).
 
-The intended publication URL is https://docs.livingprooflabs.com/livingproof-sim-gazebo/. Pages is not enabled and this URL is not yet a verified live manual. See [publication prerequisites](docs/contribute.md#publication).
+The [published manual](https://docs.livingprooflabs.com/livingproof-sim-gazebo/) is served through GitHub Pages. See [publication details](docs/contribute.md#publication).

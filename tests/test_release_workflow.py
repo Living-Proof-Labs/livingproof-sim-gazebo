@@ -3,31 +3,27 @@
 
 Offline: these tests read the real workflow and evaluate its job conditions
 the way GitHub would for the expressions this workflow uses. Nothing here
-publishes a release. A pull-request run of this workflow is hosted evidence
-that a PR does not release. The hosted "no releasable commits" decision and
+publishes a release. A pull-request run of the verification workflow is hosted
+evidence that a PR does not release. The hosted "no releasable commits" decision and
 a successful publish (criterion 4's last path), plus a clean install of the
 first published wheel, can only be proven by runs on main after merge.
 """
 
 from __future__ import annotations
 
+import copy
+import os
 import re
+import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW_PATH = ROOT / ".github/workflows/verify.yml"
+WORKFLOW_PATH = ROOT / ".github/workflows/release.yml"
 README = ROOT / "README.md"
 STATUS_FUNCTIONS = re.compile(r"\b(always|failure|cancelled|success)\(")
-
-EVENTS = ("pull_request", "merge_group", "schedule", "workflow_dispatch", "push")
-REFS = (
-    "refs/heads/main",
-    "refs/heads/topic",
-    "refs/pull/1/merge",
-    "refs/heads/gh-readonly-queue/main/pr-1-abc",
-)
 
 
 def _workflow_text() -> str:
@@ -84,15 +80,6 @@ def _needed(job: dict) -> list[str]:
     return list(needs)
 
 
-def _release_runs(event: str, ref: str, results: dict[str, str]) -> bool:
-    job = _load_workflow()["jobs"]["release"]
-    expression = job["if"]
-    context = {"github.event_name": event, "github.ref": ref}
-    return _evaluate(expression, context) and _implicit_needs_succeeded(
-        _needed(job), results, expression
-    )
-
-
 def _assemble_runs(draft_created: str, release_result: str) -> bool:
     job = _load_workflow()["jobs"]["assemble"]
     expression = job["if"]
@@ -105,62 +92,6 @@ def _assemble_runs(draft_created: str, release_result: str) -> bool:
 def _assemble_commands() -> str:
     steps = _load_workflow()["jobs"]["assemble"]["steps"]
     return "\n".join(step.get("run", "") for step in steps)
-
-
-def _successful_verification() -> dict[str, str]:
-    return {"verify": "success", "publish-tests": "success"}
-
-
-def test_release_job_gates_on_verification_and_main_push_only():
-    workflow = _load_workflow()
-    release = workflow["jobs"]["release"]
-    assert set(release["needs"]) == {"verify", "publish-tests"}
-    assert (
-        release["if"]
-        == "github.event_name == 'push' && github.ref == 'refs/heads/main'"
-    )
-    assert release["permissions"] == {"contents": "write"}
-    assert release["uses"].startswith(
-        "Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v"
-    )
-    assert release["with"] == {"draft-release": True}
-
-
-def test_only_a_push_to_main_with_successful_verification_runs_release():
-    ok = _successful_verification()
-    for event in EVENTS:
-        for ref in REFS:
-            expected = event == "push" and ref == "refs/heads/main"
-            assert _release_runs(event, ref, ok) is expected, f"{event} {ref}"
-
-
-def test_a_pull_request_run_does_not_release():
-    ok = _successful_verification()
-    for event in ("pull_request", "merge_group"):
-        for ref in REFS:
-            assert _release_runs(event, ref, ok) is False, f"{event} {ref}"
-            assert _assemble_runs("true", "success") is True
-    # Assemble never runs on a PR because it needs release, and release does not run.
-    assert _assemble_runs("true", "skipped") is False
-    on = _workflow_text()
-    assert "pull_request_target" not in on.split("\npermissions:", 1)[0]
-
-
-def test_a_failed_verification_blocks_the_release():
-    release = _job_block(_workflow_text(), "release")
-    assert STATUS_FUNCTIONS.search(_scalar(release, "if") or "") is None
-    for job in ("verify", "publish-tests"):
-        for result in ("failure", "cancelled", "skipped", "neutral"):
-            results = _successful_verification()
-            results[job] = result
-            assert _release_runs("push", "refs/heads/main", results) is False, (
-                f"{job}: {result}"
-            )
-        missing = {k: v for k, v in _successful_verification().items() if k != job}
-        assert _release_runs("push", "refs/heads/main", missing) is False, (
-            f"missing {job}"
-        )
-    assert _release_runs("push", "refs/heads/main", _successful_verification()) is True
 
 
 def test_a_push_with_no_releasable_commits_does_not_assemble_or_publish():
@@ -223,6 +154,67 @@ def test_assemble_requires_the_tag_to_name_the_verified_commit():
     )
 
 
+def test_sha_guard_commands_accept_a_matching_tag_and_reject_mismatches(tmp_path):
+    """Execute the assemble SHA guard, not only assert its text is in the workflow.
+
+    Matching HEAD + tag + GITHUB_SHA must pass. A wrong GITHUB_SHA, a tag on a
+    different commit, or an unknown tag must fail closed.
+    """
+    guard = next(
+        step
+        for step in _load_workflow()["jobs"]["assemble"]["steps"]
+        if step.get("name") == "Require the release tag to name the verified commit"
+    )
+    assert "if" not in guard and not guard.get("continue-on-error", False)
+    commands = guard["run"]
+    assert 'test "$(git rev-parse HEAD)" = "$GITHUB_SHA"' in commands
+    assert 'test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$GITHUB_SHA"' in commands
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    git = ["git", "-C", str(repo)]
+    subprocess.run(git + ["init"], check=True, capture_output=True)
+    subprocess.run(
+        git + ["config", "user.email", "vera@livingprooflabs.invalid"], check=True
+    )
+    subprocess.run(git + ["config", "user.name", "Vera (verification)"], check=True)
+    (repo / "f").write_text("one\n")
+    subprocess.run(git + ["add", "f"], check=True)
+    subprocess.run(git + ["commit", "-m", "feat: one"], check=True, capture_output=True)
+    tagged = subprocess.check_output(git + ["rev-parse", "HEAD"], text=True).strip()
+    subprocess.run(git + ["tag", "v1.0.0"], check=True)
+    subprocess.run(git + ["tag", "-a", "v1.0.1", "-m", "annotated"], check=True)
+    (repo / "f").write_text("two\n")
+    subprocess.run(git + ["add", "f"], check=True)
+    subprocess.run(git + ["commit", "-m", "feat: two"], check=True, capture_output=True)
+    later = subprocess.check_output(git + ["rev-parse", "HEAD"], text=True).strip()
+
+    def run_guard(*, ref: str, sha: str, tag: str) -> int:
+        subprocess.run(
+            git + ["checkout", "--quiet", ref], check=True, capture_output=True
+        )
+        env = {**os.environ, "GITHUB_SHA": sha, "RELEASE_TAG": tag}
+        return subprocess.run(
+            ["bash", "--noprofile", "--norc", "-eo", "pipefail", "-c", commands],
+            cwd=repo,
+            env=env,
+            capture_output=True,
+            text=True,
+        ).returncode
+
+    assert run_guard(ref="v1.0.0", sha=tagged, tag="v1.0.0") == 0
+    assert run_guard(ref="v1.0.1", sha=tagged, tag="v1.0.1") == 0
+    assert run_guard(ref="v1.0.0", sha=later, tag="v1.0.0") != 0
+    assert run_guard(ref=later, sha=later, tag="v1.0.0") != 0
+    assert run_guard(ref=later, sha=tagged, tag="v1.0.0") != 0
+    assert (
+        run_guard(
+            ref="v1.0.0", sha="deadbeefdeadbeefdeadbeefdeadbeefdeadbeef", tag="v1.0.0"
+        )
+        != 0
+    )
+    assert run_guard(ref="v1.0.0", sha=tagged, tag="v9.9.9") != 0
+
+
 def test_every_release_upload_replaces_assets_so_a_rerun_can_finish_the_draft():
     uploads = [
         line
@@ -251,3 +243,147 @@ def test_readme_explains_rebuild_at_the_tag_and_assemble_failure_recovery():
     assert (
         "will not recreate the draft" in text or "does not recreate the draft" in text
     )
+
+
+def _release_context(**overrides):
+    context = {
+        "github.event.workflow_run.conclusion": "success",
+        "github.event.workflow_run.event": "push",
+        "github.event.workflow_run.head_branch": "main",
+        "github.event.workflow_run.head_repository.full_name": "owner/repo",
+        "github.repository": "owner/repo",
+        "github.event.workflow_run.head_sha": "a" * 40,
+        "github.sha": "a" * 40,
+    }
+    context.update(overrides)
+    return context
+
+
+def _release_allowed(context):
+    # Parse the actual YAML expression; fail on unsupported syntax instead of
+    # substituting a separately maintained copy of the gate.
+    expression = _load_workflow()["jobs"]["release"]["if"]
+    decisions = []
+    for term in expression.split("&&"):
+        left, right = term.strip().split(" == ")
+        expected = right[1:-1] if right.startswith("'") else context[right]
+        decisions.append(context[left] == expected)
+    return all(decisions)
+
+
+def test_release_accepts_only_successful_same_repository_main_push():
+    assert _release_allowed(_release_context())
+    for field, values in {
+        "conclusion": ["failure", "cancelled", "skipped", "neutral", ""],
+        "event": [
+            "pull_request",
+            "pull_request_target",
+            "workflow_dispatch",
+            "schedule",
+        ],
+        "head_branch": ["topic", "", "refs/heads/main"],
+        "head_repository.full_name": ["attacker/fork", ""],
+        "head_sha": ["b" * 40, ""],
+    }.items():
+        for value in values:
+            context = _release_context(**{f"github.event.workflow_run.{field}": value})
+            assert not _release_allowed(context), (field, value)
+
+
+def test_main_moving_requires_verification_of_the_new_revision():
+    # A passed, B is newer main when workflow_run is emitted: no release of B.
+    assert not _release_allowed(_release_context(**{"github.sha": "b" * 40}))
+    # B subsequently passes: the new completion event can release B.
+    assert _release_allowed(
+        _release_context(
+            **{
+                "github.sha": "b" * 40,
+                "github.event.workflow_run.head_sha": "b" * 40,
+            }
+        )
+    )
+    # Main moving after the event does not mutate github.sha. The pinned shared
+    # workflow checks out that event revision and its action asserts HEAD == SHA.
+    # Assembly independently rejects any tag naming a newer/unverified revision.
+
+
+def test_release_trigger_permissions_and_pinned_engine():
+    workflow = _load_workflow()
+    assert workflow[True] == {
+        "workflow_run": {
+            "workflows": ["Gazebo verification"],
+            "types": ["completed"],
+            "branches": ["main"],
+        }
+    }
+    assert workflow["permissions"] == {"contents": "read"}
+    assert workflow["concurrency"]["cancel-in-progress"] is False
+    release = workflow["jobs"]["release"]
+    assert release["permissions"] == {"contents": "write"}
+    assert release["uses"] == (
+        "Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.6.14"
+    )
+    assert release["with"] == {"draft-release": True}
+    verification = yaml.safe_load((ROOT / ".github/workflows/verify.yml").read_text())
+    assert verification["name"] == "Gazebo verification"
+    assert "release" not in verification["jobs"]
+    assert "assemble" not in verification["jobs"]
+    assert verification["jobs"]["publish-tests"]["needs"] == "verify"
+
+
+def test_assembly_guard_precedes_any_build_or_publication():
+    steps = _load_workflow()["jobs"]["assemble"]["steps"]
+    guard_index = next(
+        i
+        for i, step in enumerate(steps)
+        if step.get("name") == "Require the release tag to name the verified commit"
+    )
+    assert (
+        guard_index == 1
+    )  # immediately after checkout, before executing repository code
+    assert not _load_workflow()["jobs"]["assemble"].get("continue-on-error", False)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "conclusion",
+        "event",
+        "head_branch",
+        "head_repository.full_name",
+        "head_sha",
+    ],
+)
+def test_removing_each_release_gate_is_detected(monkeypatch, field):
+    workflow = copy.deepcopy(_load_workflow())
+    workflow["jobs"]["release"]["if"] = " && ".join(
+        term
+        for term in workflow["jobs"]["release"]["if"].split("&&")
+        if f"github.event.workflow_run.{field} " not in term
+    )
+    monkeypatch.setattr(__import__(__name__), "_load_workflow", lambda: workflow)
+    with pytest.raises(AssertionError):
+        test_release_accepts_only_successful_same_repository_main_push()
+
+
+@pytest.mark.parametrize(
+    "mutation", ["bypass", "mask-errors", "conditional", "continue"]
+)
+def test_bypassing_the_actual_assembly_guard_is_detected(
+    monkeypatch, tmp_path, mutation
+):
+    workflow = copy.deepcopy(_load_workflow())
+    guard = workflow["jobs"]["assemble"]["steps"][1]
+    if mutation == "bypass":
+        guard["run"] = "exit 0\n" + guard["run"]
+    elif mutation == "mask-errors":
+        guard["run"] = "\n".join(
+            line + " || true" for line in guard["run"].splitlines()
+        )
+    elif mutation == "conditional":
+        guard["if"] = "false"
+    else:
+        guard["continue-on-error"] = True
+    monkeypatch.setattr(__import__(__name__), "_load_workflow", lambda: workflow)
+    with pytest.raises(AssertionError):
+        test_sha_guard_commands_accept_a_matching_tag_and_reject_mismatches(tmp_path)
