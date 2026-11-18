@@ -132,7 +132,7 @@ and the libsqlite3 bump) and after the base image's creation date.
 
 | Test | Result |
 |---|---|
-| Exact lock plus Dockerfile pins, empty dpkg status, 20261118T000000Z, with `--no-install-recommends` | 0 unavailable. 933 pins resolve to exactly 933 installed packages, 0 version mismatches, 0 extra dependencies: the lock is a closed set under this flag. |
+| Exact lock plus Dockerfile pins, empty dpkg status, 20261118T000000Z, with `--no-install-recommends` | 0 unavailable. 933 pins resolve to exactly 933 installed packages, 0 version mismatches, 0 extra dependencies: the lock is a closed set under this chosen setting. |
 | Same empty-status run with Recommends left on | 0 unavailable, 0 version mismatches, but apt would install 952 packages: 19 extra Recommends. This is what the reproduction script's `apt-get -s install -y` does, and what the Dockerfile lock-install line does (only the later git layer passes `--no-install-recommends`). |
 | Same, with the real base image's dpkg status and Recommends on (as the Docker build would see it) | Resolves: 848 new, 3 upgraded, 0 removed, no downgrade. 89 pins already satisfied by the image. The 851 `.deb` set includes 7 of those extras (`less`, `libcbor0.10`, `libfido2-1`, `libxmuu1`, `openssh-client`, `patch`, `xauth`). |
 | `apt-get -d install` of that set (Recommends on) | 851 `.deb` files, 519 MB, 0 errors; all checked against the signed index. |
@@ -140,10 +140,14 @@ and the libsqlite3 bump) and after the base image's creation date.
 | Unpinned lock names at 20261101T000000Z, image from 2026-11-10 | Fails: `libpcre2-8-0` would have to be **downgraded** from the image's version. |
 | Unpinned lock names at 20261111T000000Z vs the current lock | 14 of the 838 pins apt had to install would resolve to different versions: about 1.7% moved in 7 days. |
 
-The "933 resolve to exactly 933, 0 extras, closed set" figure holds only with
-`--no-install-recommends`. The script and the Dockerfile lock-install leave Recommends
-on. Implementation should either add `--no-install-recommends` or lock the 19 extras;
-that choice is left open on #37.
+The "933 resolve to exactly 933, 0 extras, closed set" figure holds with
+`--no-install-recommends`, which is the chosen setting for the locked install
+(#37). Today's reproduction script and the Dockerfile lock-install still leave
+Recommends on, so the empty-status run with Recommends on yields 19 extras, and
+the image-status 851-`.deb` set includes 7 of them. Implementation will add
+`--no-install-recommends` to the locked install, check which of those extras
+(`less`, `openssh-client`, `xauth`, `patch`, and the rest) the image really
+needs, and lock those explicitly.
 
 Consequences: (a) the lock must be regenerated whenever the ID moves (the ID alone does
 not replace it), (b) the snapshot ID must not be older than the base image's build, and
