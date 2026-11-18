@@ -36,6 +36,7 @@ MESA = (
     "mesa-vdpau-drivers",
     "mesa-vulkan-drivers",
 )
+TRANSPORT = re.compile(r"gz-transport13(?:-|:|$)")
 SUITES = ("noble", "noble-updates", "noble-security")
 COMPONENTS = ("main", "universe", "restricted", "multiverse")
 ARCHIVE = "https://archive.ubuntu.com/ubuntu/dists"
@@ -92,6 +93,20 @@ def test_the_lock_is_well_formed_and_the_mesa_set_shares_one_version():
     mesa = {name: version for name, version in pins if _base(name) in MESA}
     assert {_base(name) for name in mesa} == set(MESA)
     assert len(set(mesa.values())) == 1
+
+
+def test_the_osrf_transport13_set_shares_one_version_and_records_digests():
+    """The nine Transport 13 packages are one release, each with a digest.
+
+    OSRF removed 13.6.0-1~noble from the live index (#46); a half-updated set
+    would fail to install with unmet versioned dependencies.
+    """
+    pins = [(name, version) for name, version in _pins(LOCK) if TRANSPORT.search(name)]
+    assert len(pins) == 9, pins
+    assert len({version for _, version in pins}) == 1
+    digests = _osrf_sha256s(LOCK)
+    for name, _ in pins:
+        assert re.fullmatch(r"[0-9a-f]{64}", digests.get(name, "")), name
 
 
 def test_dockerfile_apt_pins_are_listed_or_are_the_git_layer_and_lock_packages():
@@ -198,4 +213,39 @@ def test_every_lock_and_dockerfile_pin_is_in_the_live_noble_or_osrf_index():
             missing.append(f"Dockerfile {name}={version}")
     assert missing == [], (
         f"{len(missing)} pin(s) missing from the live indexes: " + ", ".join(missing)
+    )
+
+
+def _index_sha256s(text: str) -> dict[tuple[str, str], str]:
+    """Return (name, version) -> SHA256 for each stanza of an OSRF Packages file."""
+    found: dict[tuple[str, str], str] = {}
+    name = version = sha = None
+    for line in text.splitlines() + [""]:
+        if line.startswith("Package:"):
+            name = line.split(":", 1)[1].strip()
+        elif line.startswith("Version:"):
+            version = line.split(":", 1)[1].strip()
+        elif line.startswith("SHA256:"):
+            sha = line.split(":", 1)[1].strip()
+        elif line == "":
+            if name and version and sha:
+                found[(name, version)] = sha
+            name = version = sha = None
+    return found
+
+
+@network
+def test_every_recorded_osrf_sha256_matches_the_live_osrf_index():
+    """A pin that resolves by version must also match the published digest (#46)."""
+    live = _index_sha256s(_fetch_packages(OSRF))
+    bad = []
+    for name, digest in _osrf_sha256s(LOCK).items():
+        version = dict(_pins(LOCK))[name]
+        have = live.get((_base(name), version))
+        if have != digest:
+            bad.append(
+                f"{name}={version} recorded {digest[:12]} live {(have or 'absent')[:12]}"
+            )
+    assert bad == [], (
+        f"{len(bad)} OSRF digest(s) do not match the live index: " + "; ".join(bad)
     )
