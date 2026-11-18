@@ -12,3 +12,12 @@ provide the actual pass/fail status and 14-day evidence artifacts for each revis
 This manual does not embed or claim fresh native test outcomes. No measured line
 coverage report is generated. See [Version and source](version.md) to identify the
 documentation revision separately from package releases and test results.
+
+## Development versions
+
+`hatch-vcs` uses setuptools-scm to derive the package version from Git history.
+Before the first version tag, an initial no-tag build is `0.0.1.devN`, where `N`
+is the commit distance. After tags exist, untagged commits derive their development
+version from the nearest version tag; they do not remain `0.0.1.devN`. A clean
+version-tag checkout builds that release version. The configured `0.0.0` fallback
+is for unavailable version metadata, not the normal untagged Git build.
