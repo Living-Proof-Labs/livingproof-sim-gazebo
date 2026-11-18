@@ -96,9 +96,15 @@ def test_the_reproduction_script_exists_and_parses():
     assert result.returncode == 0, result.stderr
 
 
-def test_this_evaluation_changes_no_build_input():
-    dockerfile = (ROOT / "Dockerfile").read_text()
-    assert "snapshot.ubuntu.com" not in dockerfile
+def test_the_evaluation_document_is_a_historical_write_up(text):
+    """#26 remains evaluation-only in the document; #37 implements it.
+
+    The evaluation write-up must still say it edited no Dockerfile, lock or
+    workflow. It must not keep forbidding snapshot.ubuntu.com in the current
+    Dockerfile, which is now the #37 implementation.
+    """
+    assert "Evaluation only" in text
+    assert "edits no Dockerfile" in text
 
 
 def test_the_reproduction_script_rejects_a_future_snapshot_id(tmp_path):

@@ -18,7 +18,7 @@ bounded navigation exception to dependency pinning.
 ## Build
 
 Run `task setup`, then `task docs` on a Docker host or in the prepared development
-container. `task docs:reference` refreshes the actual command and Task references;
+container. The development image installs Ubuntu packages from the dated `snapshot.ubuntu.com` ID in `tools/ubuntu-snapshot.pin`. That pin, the Dockerfile `ARG UBUNTU_SNAPSHOT`, and the lock header must agree. A scheduled workflow may propose a bump as a draft pull request; it is the second writer for snapshot IDs and never writes to `main`. `task docs:reference` refreshes the actual command and Task references;
 `task check` checks their freshness. The manual build stages existing Markdown,
 checks the pinned brand digest, records the checked-out Git revision, builds with
 Zensical, and checks rendered local links, fragments and brand inclusion.
