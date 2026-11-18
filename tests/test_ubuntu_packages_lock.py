@@ -7,7 +7,9 @@ of how far the pinned snapshot lags the live archive, and still the monitor
 for OSRF pins. Offline: the lock is well-formed and the Mesa set shares one
 version. LIVINGPROOF_NETWORK=1: each lock pin, and the Dockerfile git-layer
 apt pins, is present in noble, noble-updates, noble-security or the OSRF
-gazebo-stable noble index (amd64, https only).
+gazebo-stable noble index (amd64, https only). Recorded OSRF SHA256 values
+must also match the live index for the same package version. This monitors
+hashes daily; it does not enforce the recorded hashes at install time.
 """
 
 from __future__ import annotations
@@ -127,7 +129,7 @@ def _fetch_packages(url: str) -> str:
 def _index_versions(text: str) -> dict[str, set[str]]:
     versions: dict[str, set[str]] = defaultdict(set)
     name = version = arch = None
-    for line in text.splitlines():
+    for line in (text + "\n\n").splitlines():
         if line.startswith("Package:"):
             name = line.split(":", 1)[1].strip()
         elif line.startswith("Version:"):
@@ -143,6 +145,33 @@ def _index_versions(text: str) -> dict[str, set[str]]:
     return versions
 
 
+def _check_osrf_sha256s(text: str, lock: Path) -> None:
+    hashes: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for stanza in text.split("\n\n"):
+        fields = dict(
+            line.split(": ", 1) for line in stanza.splitlines() if ": " in line
+        )
+        name, version = fields.get("Package"), fields.get("Version")
+        if not name or not version:
+            continue
+        digest = fields.get("SHA256", "<missing>")
+        hashes[name, version].add(digest)
+        if arch := fields.get("Architecture"):
+            hashes[f"{name}:{arch}", version].add(digest)
+    expected = _osrf_sha256s(lock)
+    mismatches = []
+    for name, version in _pins(lock):
+        if name not in expected:
+            continue
+        found = hashes.get((name, version), set())
+        if found != {expected[name]}:
+            mismatches.append(
+                f"{name}={version}: expected {expected[name]}, "
+                f"found {', '.join(sorted(found)) or '<missing package/version>'}"
+            )
+    assert not mismatches, "OSRF SHA256 mismatch: " + "; ".join(mismatches)
+
+
 @network
 def test_every_lock_and_dockerfile_pin_is_in_the_live_noble_or_osrf_index():
     versions: dict[str, set[str]] = defaultdict(set)
@@ -152,7 +181,10 @@ def test_every_lock_and_dockerfile_pin_is_in_the_live_noble_or_osrf_index():
         for component in COMPONENTS
     ] + [OSRF]
     for url in urls:
-        for key, found in _index_versions(_fetch_packages(url)).items():
+        text = _fetch_packages(url)
+        if url == OSRF:
+            _check_osrf_sha256s(text, LOCK)
+        for key, found in _index_versions(text).items():
             versions[key].update(found)
     missing = []
     for name, version in _pins(LOCK):
