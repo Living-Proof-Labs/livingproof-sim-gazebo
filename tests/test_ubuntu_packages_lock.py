@@ -2,10 +2,12 @@
 """Every apt pin in the Ubuntu package lock is still in the live Noble indexes.
 
 Ubuntu drops superseded versions from -updates and -security, which broke the
-clean development image in #23. Offline: the lock is well-formed and the Mesa
-set shares one version. LIVINGPROOF_NETWORK=1: each lock pin, and the five
-Dockerfile apt pins, is present in noble, noble-updates, noble-security or the
-OSRF gazebo-stable noble index (amd64, https only).
+clean development image in #23. After #37 the daily check is an early warning
+of how far the pinned snapshot lags the live archive, and still the monitor
+for OSRF pins. Offline: the lock is well-formed and the Mesa set shares one
+version. LIVINGPROOF_NETWORK=1: each lock pin, and the Dockerfile git-layer
+apt pins, is present in noble, noble-updates, noble-security or the OSRF
+gazebo-stable noble index (amd64, https only).
 """
 
 from __future__ import annotations
@@ -53,9 +55,27 @@ def _pins(path: Path) -> list[tuple[str, str]]:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        name, version = line.split("=", 1)
+        name, rest = line.split("=", 1)
+        version = rest.split()[0]
         pins.append((name, version))
     return pins
+
+
+def _osrf_sha256s(path: Path) -> dict[str, str]:
+    """Return name -> sha256 for lock pins that record a digest."""
+    found = {}
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        name, rest = line.split("=", 1)
+        parts = rest.split()
+        digest = next(
+            (p.split(":", 1)[1] for p in parts[1:] if p.startswith("sha256:")), None
+        )
+        if digest is not None:
+            found[name] = digest
+    return found
 
 
 def _base(name: str) -> str:
@@ -72,18 +92,28 @@ def test_the_lock_is_well_formed_and_the_mesa_set_shares_one_version():
     assert len(set(mesa.values())) == 1
 
 
-def test_dockerfile_apt_pins_are_listed_or_are_the_five_bootstrap_packages():
+def test_dockerfile_apt_pins_are_listed_or_are_the_git_layer_and_lock_packages():
+    """ca-certificates is unpinned only for the live-archive bootstrap.
+
+    The locked install and the later git layer stay exact. curl is in the lock
+    so it is installed from the snapshot, not from the live archive.
+    """
     text = DOCKERFILE.read_text()
     found = dict(DOCKERFILE_PINS.findall(text))
-    assert set(found) == {"ca-certificates", "curl", "git", "git-man", "liberror-perl"}
-    lock = {_base(name): version for name, version in _pins(LOCK)}
-    # The bootstrap pins may be installed before the lock; they must still be exact.
+    assert set(found) == {"git", "git-man", "liberror-perl"}
     assert all(version for version in found.values())
-    # git and git-man are installed after the lock; ca-certificates and curl are
-    # also in the lock when the lock carries them.
-    for name in ("ca-certificates", "curl"):
-        if name in lock:
-            assert lock[name] == found[name], name
+    lock = {_base(name): version for name, version in _pins(LOCK)}
+    assert "ca-certificates" in lock
+    assert "curl" in lock
+    # The bootstrap install of ca-certificates must not carry a version pin.
+    assert re.search(
+        r"apt-get\b[^\n]*install -y ca-certificates(?:\s|;|\\|$)",
+        text,
+    ), "bootstrap ca-certificates must be unpinned"
+    assert not re.search(
+        r"apt-get\b[^\n]*install -y ca-certificates=",
+        text,
+    )
 
 
 def _fetch_packages(url: str) -> str:

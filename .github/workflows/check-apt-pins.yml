@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Check apt pins against live indexes
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+concurrency:
+  group: check-apt-pins-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  check-apt-pins:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install pytest
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --no-cache-dir pytest==8.4.2
+      - name: Run apt lock-vs-live-index check
+        env:
+          LIVINGPROOF_NETWORK: '1'
+        run: |
+          mkdir -p artifacts
+          "$RUNNER_TEMP/venv/bin/pytest" tests/test_ubuntu_packages_lock.py -v --junitxml=artifacts/apt-pins.xml
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: apt-pins-check-results
+          path: artifacts/apt-pins.xml
+          retention-days: 14
+          if-no-files-found: ignore
