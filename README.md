@@ -19,6 +19,14 @@ python3 -m venv --system-site-packages .venv
 .venv/bin/livingproof-sim-gazebo --steps 1000 --timeout 180 --output trajectory.json --render-output frame.png
 ```
 
+## How a release is published
+
+A push to `main` runs verification first. Only then does the shared semantic-release workflow run, and only if that push has releasable commits. It creates a draft release and tag. The `assemble` job checks out that tag, checks that the tag names the **same commit** verification just passed, then re-runs `task verify`, `task package`, and `task smoke` at the tag.
+
+The wheel and sdist cannot be taken from the earlier `verify` job: this package uses `hatch-vcs`, so the version (and the filenames) come from the git tag, which does not exist until the draft is created. Rebuilding at that tag, after proving it names the verified commit, is how the published assets stay tied to the verified run. `SHA256SUMS` is generated from those rebuilt assets, attached to the draft with the wheel and sdist, and only then is the draft published. Tags are not retargeted, and a published release is not altered.
+
+If `assemble` fails after the draft exists, the leftover draft stays **unpublished** and is not a public release. Re-run the failed `assemble` job in that same workflow run: uploads use `--clobber`, so partial assets are replaced and the job can finish without moving the tag. Do not retarget the tag or create a second release. A full re-run of the workflow will not recreate the draft, because the tag already exists; finish the existing draft instead.
+
 ## Development and verification
 
 On a Docker host, run `task setup` then `task verify`. Inside the development container the same commands work without Docker. `task test` writes JUnit results and explicit finite trajectory and PNG evidence to `artifacts/`. See [distribution and verification](docs/verification.md).
