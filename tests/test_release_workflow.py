@@ -12,6 +12,7 @@ first published wheel, can only be proven by runs on main after merge.
 from __future__ import annotations
 
 import copy
+import json
 import os
 import re
 import subprocess
@@ -320,9 +321,18 @@ def test_release_trigger_permissions_and_pinned_engine():
     assert workflow["concurrency"]["cancel-in-progress"] is False
     release = workflow["jobs"]["release"]
     assert release["permissions"] == {"contents": "write"}
-    assert release["uses"] == (
-        "Living-Proof-Labs/collaboration-guidelines/.github/workflows/semantic-release.yml@v9.6.14"
+    # Pinned to an exact guidelines release tag, and the same tag the Renovate
+    # preset uses, so a guidelines bump updates both together without editing
+    # this test.
+    engine = re.fullmatch(
+        r"Living-Proof-Labs/collaboration-guidelines/\.github/workflows/"
+        r"semantic-release\.yml@(v\d+\.\d+\.\d+)",
+        release["uses"],
     )
+    assert engine, release["uses"]
+    renovate = json.loads((ROOT / "renovate.json").read_text())
+    preset = "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#"
+    assert f"{preset}{engine.group(1)}" in renovate["extends"]
     assert release["with"] == {"draft-release": True}
     verification = yaml.safe_load((ROOT / ".github/workflows/verify.yml").read_text())
     assert verification["name"] == "Gazebo verification"
