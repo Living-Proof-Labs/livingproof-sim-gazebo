@@ -101,7 +101,17 @@ export APT_CONFIG=$WORK/apt.conf
 
 echo "base image: ubuntu:24.04@$digest"
 echo "snapshot:   $snap"
-apt-get update 2>&1 | grep -E '^(Err|E:)' && { echo "apt-get update failed (signature or fetch)" >&2; exit 1; } || true
+# Fail closed on any non-zero apt-get update, including failures that print no Err/E: line.
+update_out=$(apt-get update 2>&1) || {
+  printf '%s\n' "$update_out"
+  echo "apt-get update failed (signature or fetch)" >&2
+  exit 1
+}
+printf '%s\n' "$update_out"
+if printf '%s\n' "$update_out" | grep -E '^(Err|E:)'; then
+  echo "apt-get update failed (signature or fetch)" >&2
+  exit 1
+fi
 
 mapfile -t pins < <(python3 - "$ROOT" <<'PY'
 import re, sys
