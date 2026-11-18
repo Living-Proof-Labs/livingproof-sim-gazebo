@@ -132,12 +132,18 @@ and the libsqlite3 bump) and after the base image's creation date.
 
 | Test | Result |
 |---|---|
-| Exact lock plus Dockerfile pins, empty dpkg status, 20261118T000000Z | 0 unavailable. 933 pins resolve to exactly 933 installed packages, 0 version mismatches, 0 extra dependencies: the lock is a closed set. |
-| Same, with the real base image's dpkg status (as the Docker build would see it) | Resolves: 848 new, 3 upgraded, 0 removed, no downgrade. 89 pins already satisfied by the image. |
-| `apt-get -d install` of that set | 851 `.deb` files, 519 MB, 0 errors; all checked against the signed index. |
+| Exact lock plus Dockerfile pins, empty dpkg status, 20261118T000000Z, with `--no-install-recommends` | 0 unavailable. 933 pins resolve to exactly 933 installed packages, 0 version mismatches, 0 extra dependencies: the lock is a closed set under this flag. |
+| Same empty-status run with Recommends left on | 0 unavailable, 0 version mismatches, but apt would install 952 packages: 19 extra Recommends. This is what the reproduction script's `apt-get -s install -y` does, and what the Dockerfile lock-install line does (only the later git layer passes `--no-install-recommends`). |
+| Same, with the real base image's dpkg status and Recommends on (as the Docker build would see it) | Resolves: 848 new, 3 upgraded, 0 removed, no downgrade. 89 pins already satisfied by the image. The 851 `.deb` set includes 7 of those extras (`less`, `libcbor0.10`, `libfido2-1`, `libxmuu1`, `openssh-client`, `patch`, `xauth`). |
+| `apt-get -d install` of that set (Recommends on) | 851 `.deb` files, 519 MB, 0 errors; all checked against the signed index. |
 | Same lock at 20261117T000000Z | **9 unavailable**: `alsa-ucm-conf 1.2.10-1ubuntu5.16` and the eight Mesa `25.2.8-0ubuntu0.24.04.5` pins, exactly the set PR #24 had to refresh. |
 | Unpinned lock names at 20261101T000000Z, image from 2026-11-10 | Fails: `libpcre2-8-0` would have to be **downgraded** from the image's version. |
 | Unpinned lock names at 20261111T000000Z vs the current lock | 14 of the 838 pins apt had to install would resolve to different versions: about 1.7% moved in 7 days. |
+
+The "933 resolve to exactly 933, 0 extras, closed set" figure holds only with
+`--no-install-recommends`. The script and the Dockerfile lock-install leave Recommends
+on. Implementation should either add `--no-install-recommends` or lock the 19 extras;
+that choice is left open on #37.
 
 Consequences: (a) the lock must be regenerated whenever the ID moves (the ID alone does
 not replace it), (b) the snapshot ID must not be older than the base image's build, and
@@ -148,7 +154,7 @@ compare them, and (c) a snapshot dated at the last good lock would have prevente
 ## Q4 OSRF
 
 124 of the 933 pins (13%, 32.5 MB) come from `packages.osrfoundation.org/gazebo/ubuntu-stable`
-(gz-sensors 41, gz-common 17, gz-physics 14, gz-transport 8, gz-rendering 7, and others).
+(gz-sensors 41, gz-common 17, gz-physics 14, gz-transport 9, gz-rendering 7, and others).
 
 - There is no snapshot service. The index lists **one version per package** (0 of 579
   packages have more than one), and superseded files leave the pool: the 7.8.0 `.deb` of
