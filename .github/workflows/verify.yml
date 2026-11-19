@@ -1,6 +1,8 @@
 name: Gazebo verification
 on:
   pull_request:
+  merge_group:
+    types: [checks_requested]
   push:
     branches: [main]
 concurrency:
@@ -76,13 +78,15 @@ jobs:
     steps:
       # The workflow-wide main concurrency group remains held through deployment.
       # A rerun retains its old github.sha, so concurrency alone is insufficient.
-      - name: Reject stale main revision
+      - name: Check deployment freshness
+        id: freshness
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PYTHON'
           import json
           import os
+          import re
           from urllib.request import Request, urlopen
 
           if os.environ["GITHUB_REF"] != "refs/heads/main":
@@ -98,11 +102,22 @@ jobs:
           )
           with urlopen(request, timeout=30) as response:
               current = json.load(response)["object"]["sha"]
-          if current != os.environ["GITHUB_SHA"]:
-              raise SystemExit("Refusing stale deployment: workflow revision is no longer main")
-          print("Deployment revision matches current main")
+          candidate = os.environ["GITHUB_SHA"]
+          if not isinstance(current, str) or not re.fullmatch(r"[0-9a-f]{40}", current):
+              raise SystemExit("Invalid current main SHA; refusing deployment")
+          if not re.fullmatch(r"[0-9a-f]{40}", candidate):
+              raise SystemExit("Invalid candidate SHA; refusing deployment")
+          fresh = current == candidate
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"current={str(fresh).lower()}\n")
+          if fresh:
+              print("Deployment revision matches current main")
+          else:
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                  summary.write("Skipped stale deployment: workflow revision is no longer main\n")
           PYTHON
       - name: Deploy manual
+        if: steps.freshness.outputs.current == 'true'
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
   publish-tests:
@@ -122,3 +137,32 @@ jobs:
           reporter: python-xunit
           fail-on-error: 'true'
           fail-on-empty: 'true'
+  verification-gate:
+    name: Gazebo verification gate
+    if: always()
+    needs: [verify, publish-tests]
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Require complete verification evidence
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+          IS_FORK: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import os
+
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          event = os.environ["GITHUB_EVENT_NAME"]
+          if event not in {"pull_request", "merge_group", "push"}:
+              raise SystemExit("Unsupported verification event")
+          expected = {"verify": "success", "publish-tests": "success"}
+          if event == "pull_request" and os.environ["IS_FORK"] == "true":
+              expected["publish-tests"] = "skipped"
+          if set(needs) != set(expected):
+              raise SystemExit("Missing or unexpected verification jobs")
+          for job, result in expected.items():
+              if needs[job].get("result") != result:
+                  raise SystemExit(f"Incomplete verification: {job} requires {result}")
+          PYTHON
