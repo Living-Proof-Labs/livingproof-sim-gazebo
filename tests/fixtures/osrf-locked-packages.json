@@ -1,0 +1,869 @@
+[
+  {
+    "Package": "gz-harmonic",
+    "Version": "1.0.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-dev, libgz-fuel-tools9-dev, libgz-sim8-dev, libgz-gui8-dev, libgz-launch7-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-physics7-dev, libgz-plugin2-dev, libgz-rendering8-dev, libgz-sensors8-dev, libgz-tools2-dev, libgz-transport13-dev, libgz-utils2-cli-dev, libgz-utils2-dev, libsdformat14-dev, gz-launch7-cli, gz-plugin2-cli, gz-sim8-cli, gz-transport13-cli, python3-gz-math7, python3-gz-msgs10, python3-gz-sim8, python3-gz-transport13, python3-sdformat14",
+    "SHA256": "dd9ec689ddffae54fc71643442487aca5489c95fb403c46ae5abe46d442cee4b"
+  },
+  {
+    "Package": "gz-launch7-cli",
+    "Version": "7.1.2-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-launch7 (= 7.1.2-1~noble)",
+    "SHA256": "d42020e16d6f78462d88eb78f0c6cdfeb26f06c7b30f979a7d2e1ee92a798338"
+  },
+  {
+    "Package": "gz-plugin2-cli",
+    "Version": "2.0.4-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-plugin2 (= 2.0.4-1~noble), libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1)",
+    "SHA256": "405d85a48c0ef0927fad02a6ff159181d0dc762e1f22ad0e2822f20c66566a4b"
+  },
+  {
+    "Package": "gz-sim8-cli",
+    "Version": "8.15.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-sim8 (= 8.15.0-1~noble)",
+    "SHA256": "401c3a0eef606fb83954c82e8da06e3cc040d302867cda9df8fa5da9e9da1f04"
+  },
+  {
+    "Package": "gz-tools2",
+    "Version": "2.0.4-1~noble",
+    "Architecture": "amd64",
+    "Depends": "ruby:any, libc6 (>= 2.14), libgcc-s1 (>= 4.2), libstdc++6 (>= 13.1)",
+    "SHA256": "ffa472118cef638c15d72af7493fd1ebcf81d1eda0f24df002fce657ee1b8833"
+  },
+  {
+    "Package": "gz-transport13-cli",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-transport13 (= 13.7.0-1~noble), libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-msgs10 (>= 10.4.0), libprotobuf32t64 (>= 3.21.12), libstdc++6 (>= 13.1)",
+    "SHA256": "146b0d3178b1005bd73a93c54b1967ff8c4fda50641ecb646c393eb6e50d957b"
+  },
+  {
+    "Package": "libdart-core+collisions+odelcpsolver6.13",
+    "Version": "6.13.2+ds1-1~osrf2~noble",
+    "Architecture": "amd64",
+    "Depends": "libassimp5 (>= 5.3.1+ds), libbullet3.24t64 (>= 3.24+dfsg), libc6 (>= 2.38), libfcl0.7 (>= 0.7.0), libgcc-s1 (>= 3.3.1), liboctomap1.9t64 (>= 1.9.7+dfsg), libode8t64 (>= 2:0.16.2), libstdc++6 (>= 13.1)",
+    "SHA256": "7602bf8695cb1e673be9008ed17222e9ff1a08b3bbaa211a05a4ce73c579037e"
+  },
+  {
+    "Package": "libgz-cmake3-dev",
+    "Version": "3.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "cmake",
+    "SHA256": "1683953aeae33e6df1f9088ef8c786694517fe5ecf69fe0dae30fd7885410d67"
+  },
+  {
+    "Package": "libgz-common5",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1), libuuid1 (>= 2.16)",
+    "SHA256": "8ae89d8e85db74f33ded24982dcf81c27a948074ad0a525e9aa6545228ee2cbb"
+  },
+  {
+    "Package": "libgz-common5-av",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libavcodec60 (>= 7:6.0), libavdevice60 (>= 7:6.0), libavformat60 (>= 7:6.0), libavutil58 (>= 7:6.0), libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libstdc++6 (>= 13.1), libswscale7 (>= 7:6.0)",
+    "SHA256": "1eec7cedda1cf6df3a7736c888c9ebd910203abf94e02a3b7761fef2c171faaa"
+  },
+  {
+    "Package": "libgz-common5-av-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-core-dev (= 5.9.0-1~noble), libgz-utils2-dev, libavdevice-dev, libavformat-dev, libavcodec-dev, libswscale-dev, libavutil-dev, libgz-common5-av (= 5.9.0-1~noble)",
+    "SHA256": "294e08b25c4d47ba259b6ab7efd32639d3baf9e03fcc17fc47f98ac87767b70b"
+  },
+  {
+    "Package": "libgz-common5-core-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-utils2-dev, uuid-dev, libgz-common5 (= 5.9.0-1~noble)",
+    "SHA256": "4d5a79d31e83f988e839e09abe094e3b475788cda9591a18d6a3caad2b6e82c9"
+  },
+  {
+    "Package": "libgz-common5-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-common5-core-dev (= 5.9.0-1~noble), libgz-common5-av-dev (= 5.9.0-1~noble), libgz-common5-events-dev (= 5.9.0-1~noble), libgz-common5-geospatial-dev (= 5.9.0-1~noble), libgz-common5-graphics-dev (= 5.9.0-1~noble), libgz-common5-io-dev (= 5.9.0-1~noble), libgz-common5-profiler-dev (= 5.9.0-1~noble), libgz-common5-testing-dev (= 5.9.0-1~noble)",
+    "SHA256": "7c5e67adc9b8d9d99ed551025628114e7d1e104326398c75781647e00c5113f6"
+  },
+  {
+    "Package": "libgz-common5-events",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "ea308bec5496390b3a5da921befd5dac11e06e6c790c6aae06f21632ef7617cf"
+  },
+  {
+    "Package": "libgz-common5-events-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-core-dev (= 5.9.0-1~noble), libgz-utils2-dev, libgz-math7-dev, libgz-common5-events (= 5.9.0-1~noble)",
+    "SHA256": "7ae445935602c2ef3200535eceaf90d83e36784be2bbf324a558467a53d4ede5"
+  },
+  {
+    "Package": "libgz-common5-geospatial",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libgdal34t64 (>= 3.6.0), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.6.0), libstdc++6 (>= 13.1)",
+    "SHA256": "a9ecab076c4a3640a4e006cc3983b89a870efb1d930416d61a8c4a4a0a6abba9"
+  },
+  {
+    "Package": "libgz-common5-geospatial-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgdal-dev, libgz-cmake3-dev, libgz-common5-graphics-dev (= 5.9.0-1~noble), libgz-math7-dev, libgz-utils2-dev, libgz-common5-geospatial (= 5.9.0-1~noble)",
+    "SHA256": "e395930755279ce4c12d37a074567fa986e066f8ef9439aeeea17d584e17ba81"
+  },
+  {
+    "Package": "libgz-common5-graphics",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libassimp5 (>= 5.3.1+ds), libc6 (>= 2.38), libfreeimage3 (>= 3.18.0+ds2), libgcc-s1 (>= 3.3.1), libglib2.0-0t64 (>= 2.12.0), libgts-0.7-5t64 (>= 0.7.6), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.6.0), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0)",
+    "SHA256": "c98947ac40d2624f2252c7c20b4468870b205aa65e2aea6e31b0eecd117b2106"
+  },
+  {
+    "Package": "libgz-common5-graphics-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libassimp-dev, libfreeimage-dev, libgts-dev, libgz-cmake3-dev, libgz-common5-core-dev (= 5.9.0-1~noble), libgz-math7-dev, libgz-utils2-dev, libtinyxml2-dev, libgz-common5-graphics (= 5.9.0-1~noble)",
+    "SHA256": "6b2982703d1795f0bfb7034d1d0f78a3cd5fa22fac4aa8f0df6be2d1c4c64c1c"
+  },
+  {
+    "Package": "libgz-common5-io",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 11)",
+    "SHA256": "12cefee7e5083a4742f137b6a7cdd2ec44bc8560802f04ec8cab0b1d30314932"
+  },
+  {
+    "Package": "libgz-common5-io-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-core-dev (= 5.9.0-1~noble), libgz-math7-dev, libgz-utils2-dev, libgz-common5-io (= 5.9.0-1~noble)",
+    "SHA256": "222686eb66c62fa2bd127d592e7b9a8035f58d2113698b27725b3ea6d7f413b0"
+  },
+  {
+    "Package": "libgz-common5-profiler",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "b44c9b01e1dcb17e59f864baae65cfb78978a01a4f44d20a1e9b99b116030db1"
+  },
+  {
+    "Package": "libgz-common5-profiler-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-core-dev (= 5.9.0-1~noble), libgz-common5-profiler (= 5.9.0-1~noble)",
+    "SHA256": "9045cdd910edf786151b4f42d432eb35df11194d0215d50ab5cc3d50ece2bc9a"
+  },
+  {
+    "Package": "libgz-common5-testing",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "e661d12d26523915f82cc03419f6172c2de130e1b9ce635490dfb57b326364cd"
+  },
+  {
+    "Package": "libgz-common5-testing-dev",
+    "Version": "5.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-utils2-dev, libgz-common5-testing (= 5.9.0-1~noble)",
+    "SHA256": "e2b743b2bcfdcbca2aa66619a2e1e160f864bd703d1ccfb05ad9b92731be57a0"
+  },
+  {
+    "Package": "libgz-fuel-tools9",
+    "Version": "9.1.1-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libcurl4t64 (>= 7.56.1), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.7.1), libgz-math7 (>= 7.5.1), libgz-msgs10 (>= 10.3.1), libjsoncpp25 (>= 1.9.5), libprotobuf32t64 (>= 3.21.12), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0), libyaml-0-2, libzip4t64 (>= 0.11.2), gz-tools2",
+    "SHA256": "a6d8ce503c52a8930cdab81809d0f69b3dc442dab0599a5a97385b84a989a083"
+  },
+  {
+    "Package": "libgz-fuel-tools9-dev",
+    "Version": "9.1.1-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-core-dev, libgz-msgs10-dev, libgz-tools2-dev, libzip-dev, libjsoncpp-dev, libcurl4-openssl-dev, libyaml-dev, libtinyxml2-dev, libgz-fuel-tools9 (= 9.1.1-1~noble)",
+    "SHA256": "412e874b88a389dcb63bebd58616b038d33df680a8141b64b7741084f11478bd"
+  },
+  {
+    "Package": "libgz-gui8",
+    "Version": "8.4.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.7.1), libgz-common5-events (>= 5.7.1), libgz-common5-graphics (>= 5.7.1), libgz-math7 (>= 7.5.1), libgz-msgs10 (>= 10.3.1), libgz-plugin2 (>= 2.0.4), libgz-rendering8 (>= 8.2.2), libgz-transport13 (>= 13.4.0), libprotobuf32t64 (>= 3.21.12), libqt5core5t64 (>= 5.15.1), libqt5gui5t64 (>= 5.6.0~beta) | libqt5gui5-gles (>= 5.6.0~beta), libqt5qml5 (>= 5.9.0~beta), libqt5quick5 (>= 5.14.1) | libqt5quick5-gles (>= 5.14.1), libqt5widgets5t64 (>= 5.0.2), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0)",
+    "SHA256": "697318150ecd6e2f89783c95597e6915bac7036b388df22bac835dbec6c3dc9a"
+  },
+  {
+    "Package": "libgz-gui8-dev",
+    "Version": "8.4.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-common5-profiler-dev, libgz-gui8 (= 8.4.0-1~noble), libgz-math7-dev, libgz-msgs10-dev, libgz-plugin2-dev, libgz-rendering8-ogre1-dev, libgz-tools2-dev, libgz-transport13-dev, libgz-utils2-dev, libprotobuf-dev, libprotoc-dev, libtinyxml2-dev, qml-module-qt-labs-folderlistmodel, qml-module-qt-labs-platform, qml-module-qt-labs-settings, qml-module-qtcharts, qml-module-qtgraphicaleffects, qml-module-qtqml-models2, qml-module-qtquick-controls, qml-module-qtquick-controls2, qml-module-qtquick-dialogs, qml-module-qtquick-layouts, qml-module-qtquick-templates2, qml-module-qtquick-window2, qml-module-qtquick2, qtbase5-dev, qtdeclarative5-dev, qtquickcontrols2-5-dev",
+    "SHA256": "b636a70c84df0e8c58d03f1c4b335970b6be2a932ab89157e6dee15d4bdb3951"
+  },
+  {
+    "Package": "libgz-launch7",
+    "Version": "7.1.2-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libbinutils (>= 2.42), libbinutils (<< 2.42.1), libc6 (>= 2.38), libgcc-s1 (>= 4.2), libgz-common5 (>= 5.8.0), libgz-common5-graphics (>= 5.8.0), libgz-fuel-tools9 (>= 9.1.1), libgz-gui8 (>= 8.4.0), libgz-math7 (>= 7.6.0), libgz-msgs10 (>= 10.3.2), libgz-plugin2 (>= 2.0.4), libgz-sim8 (>= 8.13.0), libgz-transport13 (>= 13.5.0), libprotobuf32t64 (>= 3.21.12), libqt5core5t64 (>= 5.15.1), libqt5gui5t64 (>= 5.2.0) | libqt5gui5-gles (>= 5.2.0), libqt5widgets5t64 (>= 5.0.2), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0), libwebsockets19t64 (>= 1.7.0)",
+    "SHA256": "450df2a7c875e8bb386928aea4586a4b3364bab063e43dd9154af4a8ca01f09b"
+  },
+  {
+    "Package": "libgz-launch7-dev",
+    "Version": "7.1.2-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-dev, libgz-sim8-dev, libgz-gui8-dev, libgz-msgs10-dev, libgz-plugin2-dev, libgz-tools2-dev, libgz-transport13-dev, libsdformat14-dev, libtinyxml2-dev, libwebsockets-dev, qtquickcontrols2-5-dev, libqt5core5a, libgz-launch7 (= 7.1.2-1~noble)",
+    "SHA256": "cfbf76f6a66f8a8609b0156c735d432d735fe072cc82e455b7ad9db38a20ba46"
+  },
+  {
+    "Package": "libgz-math7",
+    "Version": "7.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1)",
+    "SHA256": "9ca4a01c2638afa4e94057fd48b44c11bdcdede8920ae5a151ba3d2463f720d5"
+  },
+  {
+    "Package": "libgz-math7-dev",
+    "Version": "7.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-math7 (= 7.7.0-1~noble), libgz-cmake3-dev, libgz-utils2-dev",
+    "SHA256": "670674d92e15f9e143936c4df823426f9fc6ae6e25bcc6ca3d8d260368eae23d"
+  },
+  {
+    "Package": "libgz-math7-eigen3-dev",
+    "Version": "7.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-math7-dev (= 7.7.0-1~noble), libeigen3-dev",
+    "SHA256": "b0eb38d616f683b5f4f54b628d94430daa3bbaf68d5916b0b87bc15fe461e553"
+  },
+  {
+    "Package": "libgz-msgs10",
+    "Version": "10.4.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-utils2 (>= 2.2.1), libprotobuf32t64 (>= 3.21.12), libstdc++6 (>= 13.1)",
+    "SHA256": "fa94f59028f012b9558b53d2a1badd01249c5d177c5d1cabed39d8b31f5009e5"
+  },
+  {
+    "Package": "libgz-msgs10-dev",
+    "Version": "10.4.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libprotobuf-dev (>= 2.3.0), libprotoc-dev, protobuf-compiler, libtinyxml2-dev, libgz-cmake3-dev, libgz-math7-dev, libgz-msgs10 (= 10.4.0-1~noble)",
+    "SHA256": "cfa95e59ad1a735ec7e110b268445db8f6a89ac59080d090e8ab34acc80e1dd0"
+  },
+  {
+    "Package": "libgz-physics7",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.0), libstdc++6 (>= 13.1)",
+    "SHA256": "8615d4429b6461c71121dab0dcfa4c98c87d0d43f8a4b1abc37aa95b84c9409d"
+  },
+  {
+    "Package": "libgz-physics7-bullet",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libbullet3.24t64 (>= 3.24+dfsg), libc6 (>= 2.32), libgcc-s1 (>= 3.0), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-physics7 (>= 7.9.0), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "25e6d6b3957f1dec8785792d7f2d39b07dffa2956ee33654b8e7de606a3a9adb"
+  },
+  {
+    "Package": "libgz-physics7-bullet-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-physics7-sdf-dev (= 7.9.0-1~noble), libgz-physics7-mesh-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-plugin2-dev, libbullet-dev, libsdformat14-dev, libgz-physics7-bullet (= 7.9.0-1~noble)",
+    "SHA256": "378e33813b7926ec0a297f9932340c02c4a0faff26c09a7783630e17eb513eb9"
+  },
+  {
+    "Package": "libgz-physics7-core-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-math7-dev, libgz-plugin2-dev, libgz-physics7 (= 7.9.0-1~noble), libgz-utils2-dev",
+    "SHA256": "5553a3e3442e76f076dd5c4070510ad4b4db207a68d8fc74a266617b5339c10c"
+  },
+  {
+    "Package": "libgz-physics7-dartsim",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libassimp5 (>= 5.3.1+ds), libbullet3.24t64 (>= 3.24+dfsg), libc6 (>= 2.32), libdart-core+collisions+odelcpsolver6.13 (>= 6.13.2+ds1), libgcc-s1 (>= 3.0), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-physics7 (>= 7.9.0), libode8t64 (>= 2:0.16.2), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "870701064d499d04a21cbb9c4bcfe11433097ad765e118be54361b4c206296f8"
+  },
+  {
+    "Package": "libgz-physics7-dartsim-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-physics7-sdf-dev (= 7.9.0-1~noble), libgz-physics7-mesh-dev (= 7.9.0-1~noble), libgz-physics7-heightmap-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-common5-dev, libgz-plugin2-dev, libsdformat14-dev, libgz-physics7-dartsim (= 7.9.0-1~noble)",
+    "SHA256": "cc96f548259b74aaed04dc9f4e0bc96d52443c85caa8a489f06f6c2a54d2c1fa"
+  },
+  {
+    "Package": "libgz-physics7-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-physics7-bullet-dev (= 7.9.0-1~noble), libgz-physics7-dartsim-dev (= 7.9.0-1~noble), libgz-physics7-heightmap-dev (= 7.9.0-1~noble), libgz-physics7-mesh-dev (= 7.9.0-1~noble), libgz-physics7-sdf-dev (= 7.9.0-1~noble), libgz-physics7-tpe-dev (= 7.9.0-1~noble), libgz-physics7-tpelib-dev (= 7.9.0-1~noble)",
+    "SHA256": "ff3bb5548d74a243029952e894ad4b714aad57f766ee5595247b02e671c0ef6a"
+  },
+  {
+    "Package": "libgz-physics7-heightmap-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-physics7 (= 7.9.0-1~noble)",
+    "SHA256": "336aa0c5b6322a6810e08679b20c81448a7bb7f52a81f046aa75d40ce439e8bd"
+  },
+  {
+    "Package": "libgz-physics7-mesh-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-physics7 (= 7.9.0-1~noble)",
+    "SHA256": "91f01e2080627642d8ede37100620fd2079a11b5fc8defc831c427f50dc9fb92"
+  },
+  {
+    "Package": "libgz-physics7-sdf-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libsdformat14-dev, libgz-physics7 (= 7.9.0-1~noble)",
+    "SHA256": "93174f75d6f2d0bbf0d41c46c70f3c4575adfdf051e42fa601e09380bd1308e3"
+  },
+  {
+    "Package": "libgz-physics7-tpe",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.0), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-physics7 (>= 7.9.0), libgz-physics7-tpelib (>= 7.9.0), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "65a4014bb80a442c61aa71678755d5c84fc15a2c7fb4fe657d50366413b2812c"
+  },
+  {
+    "Package": "libgz-physics7-tpe-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-physics7-core-dev (= 7.9.0-1~noble), libgz-physics7-sdf-dev (= 7.9.0-1~noble), libgz-physics7-mesh-dev (= 7.9.0-1~noble), libgz-cmake3-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-plugin2-dev, libsdformat14-dev, libgz-physics7-tpe (= 7.9.0-1~noble)",
+    "SHA256": "aef6cb487167abed0740a65d3b552de583f3b3c6e181e3734a601ed1dda6169b"
+  },
+  {
+    "Package": "libgz-physics7-tpelib",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.0), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libstdc++6 (>= 13.1)",
+    "SHA256": "1fe3d56a2be1869f229f7c7e2ea35c5135546d3c6ea8322fb6133ddca7a57892"
+  },
+  {
+    "Package": "libgz-physics7-tpelib-dev",
+    "Version": "7.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-plugin2-dev, libgz-physics7-tpelib (= 7.9.0-1~noble)",
+    "SHA256": "2ecf49c9e176902e7ae5cb4530cbc9e8b90cbe4aaa1ce856280017569bca7f72"
+  },
+  {
+    "Package": "libgz-plugin2",
+    "Version": "2.0.4-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.34), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1)",
+    "SHA256": "0ca6cc4e1132e0ee52062312ed1b570cfbc1f8e050f50421c8e1f5790b7ff938"
+  },
+  {
+    "Package": "libgz-plugin2-dev",
+    "Version": "2.0.4-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-plugin2 (= 2.0.4-1~noble), libgz-cmake3-dev, libgz-utils2-cli-dev, libgz-utils2-dev",
+    "SHA256": "b2316b4d5cd4e79d9b2279a4d4a1e8bfa3c6e7d3992f9b2e2dbb46a377b5b294"
+  },
+  {
+    "Package": "libgz-rendering8",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-plugin2 (>= 2.0.4), libstdc++6 (>= 13.1)",
+    "SHA256": "7b985ee6d15dedb33aa248de3fcda08382f2bc4e93e6d39b47e6da7bd8dd43bb"
+  },
+  {
+    "Package": "libgz-rendering8-core-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-plugin2-dev, libgz-rendering8 (= 8.3.0-1~noble), libgz-utils2-dev",
+    "SHA256": "9d6c621211c035f5501ec20012928d0e6580670879367f7e7d9f3386e8d19ea4"
+  },
+  {
+    "Package": "libgz-rendering8-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-rendering8-core-dev (= 8.3.0-1~noble), libgz-rendering8-ogre1-dev (= 8.3.0-1~noble), libgz-rendering8-ogre2-dev (= 8.3.0-1~noble), libgz-rendering8 (= 8.3.0-1~noble)",
+    "SHA256": "689e22c7af60e7eb4ffb6a66835428dacd04ed1daf854f3c98e36fbd370423b3"
+  },
+  {
+    "Package": "libgz-rendering8-ogre1",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libglx0, libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-rendering8 (>= 8.3.0), libogre-1.9.0t64 (>= 1.9.0+dfsg1-9~), libopengl0, libstdc++6 (>= 13.1)",
+    "SHA256": "90d44ec8e72e3569fb8a33d49f2083a418d334a100ae5c1492eba85cf7391797"
+  },
+  {
+    "Package": "libgz-rendering8-ogre1-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libogre-1.9-dev, libgz-plugin2-dev, libgz-rendering8-core-dev (= 8.3.0-1~noble), libgz-rendering8-ogre1 (= 8.3.0-1~noble)",
+    "SHA256": "3a300f29ca9547bc42d4f0d63be19e884c048d0d7fb6caa881b7d534be34727a"
+  },
+  {
+    "Package": "libgz-rendering8-ogre2",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libegl1, libgcc-s1 (>= 3.3.1), libglx0, libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-rendering8 (>= 8.3.0), libogre-next-2.3.0, libopengl0, libstdc++6 (>= 13.1)",
+    "SHA256": "e6fc41d0795f8fe1e9b76bef943cb32dcc9015cc7ebf5d950675c4430d5d9acc"
+  },
+  {
+    "Package": "libgz-rendering8-ogre2-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-common5-geospatial-dev, libgz-common5-graphics-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libogre-next-2.3-dev, libvulkan-dev, libgz-plugin2-dev, libgz-rendering8-core-dev (= 8.3.0-1~noble), libgz-rendering8-ogre2 (= 8.3.0-1~noble)",
+    "SHA256": "878f60c255b74a0aef4782c6ac743be9329eed9c224c2062dcbe246d7e2c8151"
+  },
+  {
+    "Package": "libgz-sensors8",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "b21988fe5f9526d911406dced2391e8d61ce5fb0e78b47d8def27283f6cf8f4d"
+  },
+  {
+    "Package": "libgz-sensors8-air-pressure",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "35fa01e3714ae9581e9b484bf88b7aca617ee9d34a0947f121d2c283b0707732"
+  },
+  {
+    "Package": "libgz-sensors8-air-pressure-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-air-pressure (= 8.3.0-1~noble)",
+    "SHA256": "b5f68cf8ad1422f0ee175f80cec3692bbdadc9ed7ddc77f19080c75e33f1a80d"
+  },
+  {
+    "Package": "libgz-sensors8-air-speed",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "ab46888453fc7b0c75606680a5958429748ee86424cc62bc6e162f00bb96ad81"
+  },
+  {
+    "Package": "libgz-sensors8-air-speed-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-air-speed (= 8.3.0-1~noble)",
+    "SHA256": "adeb8b7c76f1c69bff1732df6eabd29722f25da37dd2339c552e5c8f40bc2cb9"
+  },
+  {
+    "Package": "libgz-sensors8-altimeter",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "0cdde087f26c03a596617c3432e1a2a3050bc3cec07755caa09fa2e2fbab3b77"
+  },
+  {
+    "Package": "libgz-sensors8-altimeter-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-altimeter (= 8.3.0-1~noble)",
+    "SHA256": "3c13aca38fb47f776d67281f82440a60ca484435c5ff0009a4cfa774dd37531f"
+  },
+  {
+    "Package": "libgz-sensors8-boundingbox-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "e9ab90a1d7d9ac730b4d74487983c403960bb2f2eb50ed1c90c98561eb4e0f7f"
+  },
+  {
+    "Package": "libgz-sensors8-boundingbox-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-boundingbox-camera (= 8.3.0-1~noble)",
+    "SHA256": "a462204414cfde58d90ec127fe8980134df6ec355b67fdaa254579c20b8e3cc8"
+  },
+  {
+    "Package": "libgz-sensors8-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "d9d744a9d26b6ac532d53d9d680dbd873999ae11e12a5b82ddf14cd8c10ed09c"
+  },
+  {
+    "Package": "libgz-sensors8-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-camera (= 8.3.0-1~noble)",
+    "SHA256": "fc0ff19cc87caa321f6527d87fe8e5b21cac4abfb932397bb9def40c82dd04ab"
+  },
+  {
+    "Package": "libgz-sensors8-core-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-rendering8-ogre1-dev, libgz-rendering8-ogre2-dev, libgz-transport13-core-dev, libgz-tools2-dev, libsdformat14-dev, libgz-sensors8 (= 8.3.0-1~noble)",
+    "SHA256": "e2c2df748ce31b50dc5b4ad09d2f862f9ea2a4cf59db561f8be2be4146bec82b"
+  },
+  {
+    "Package": "libgz-sensors8-depth-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "662db2134daf52df03d38b93ade5bbe44a313832cce640c5dd3b8f6c1224657a"
+  },
+  {
+    "Package": "libgz-sensors8-depth-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libgz-sensors8-camera-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-depth-camera (= 8.3.0-1~noble)",
+    "SHA256": "f66f9eb9c1a539e03f8c12fd7d80d69d7d35c2607b4809671b9d17393053bf27"
+  },
+  {
+    "Package": "libgz-sensors8-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-sensors8-core-dev (= 8.3.0-1~noble), libgz-sensors8-air-pressure-dev (= 8.3.0-1~noble), libgz-sensors8-air-speed-dev (= 8.3.0-1~noble), libgz-sensors8-altimeter-dev (= 8.3.0-1~noble), libgz-sensors8-boundingbox-camera-dev (= 8.3.0-1~noble), libgz-sensors8-camera-dev (= 8.3.0-1~noble), libgz-sensors8-depth-camera-dev (= 8.3.0-1~noble), libgz-sensors8-dvl-dev (= 8.3.0-1~noble), libgz-sensors8-force-torque-dev (= 8.3.0-1~noble), libgz-sensors8-imu-dev (= 8.3.0-1~noble), libgz-sensors8-lidar-dev (= 8.3.0-1~noble), libgz-sensors8-gpu-lidar-dev (= 8.3.0-1~noble), libgz-sensors8-logical-camera-dev (= 8.3.0-1~noble), libgz-sensors8-magnetometer-dev (= 8.3.0-1~noble), libgz-sensors8-navsat-dev (= 8.3.0-1~noble), libgz-sensors8-rendering-dev (= 8.3.0-1~noble), libgz-sensors8-rgbd-camera-dev (= 8.3.0-1~noble), libgz-sensors8-segmentation-camera-dev (= 8.3.0-1~noble), libgz-sensors8-thermal-camera-dev (= 8.3.0-1~noble), libgz-sensors8-wide-angle-camera-dev (= 8.3.0-1~noble)",
+    "SHA256": "fced337c4dd612ee294d3cb9172f104f5dd7d03891799a1549181aa64561cd69"
+  },
+  {
+    "Package": "libgz-sensors8-dvl",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.34), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "54eeb73653be11f73262b50923b80e3b2e0a9f55bf7fa663c628d09836b65c59"
+  },
+  {
+    "Package": "libgz-sensors8-dvl-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-dvl (= 8.3.0-1~noble)",
+    "SHA256": "df3e31014e41ed810562a59e76d7f242a83997acf69436a5defa14d95c0968a4"
+  },
+  {
+    "Package": "libgz-sensors8-force-torque",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "9e5108fa447e7c5cf0466cb05f6a3e67115cd2b5ab15edccde06a73d399dbf4e"
+  },
+  {
+    "Package": "libgz-sensors8-force-torque-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-force-torque (= 8.3.0-1~noble)",
+    "SHA256": "b411e962650e796d7fcb103b871bbe7eb12b6942bb59bd4dfb69fdf30fd40c5a"
+  },
+  {
+    "Package": "libgz-sensors8-gpu-lidar",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-lidar (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "9558fe30aad310c7fc1385ea83d06056fd5962802d6be636cf61a88a97ba4e34"
+  },
+  {
+    "Package": "libgz-sensors8-gpu-lidar-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libgz-sensors8-lidar-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-gpu-lidar (= 8.3.0-1~noble)",
+    "SHA256": "4c03d17b406e64e117795f5b8caa199deb8b8aa60d7d16576a78b949b5968a29"
+  },
+  {
+    "Package": "libgz-sensors8-imu",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "947865016326ed619b03ac98bfcb427d3bcf3f0daa4ef4bc6b7757bb2f615711"
+  },
+  {
+    "Package": "libgz-sensors8-imu-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-imu (= 8.3.0-1~noble)",
+    "SHA256": "339ecfe525003aec739cc275f1e63f69482faa94725454a72793c593a4995cac"
+  },
+  {
+    "Package": "libgz-sensors8-lidar",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "2d7ce9eea9b5fba59cfda74ae71f9ec5e0f09604b409fc6e68ea7125fae43f01"
+  },
+  {
+    "Package": "libgz-sensors8-lidar-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-lidar (= 8.3.0-1~noble)",
+    "SHA256": "26bb78e8852b25e59f637e22df3fbe3b9ef3bc7c962110b57db8d343cd7a28c6"
+  },
+  {
+    "Package": "libgz-sensors8-logical-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "037c8e42431c98620978fe61da87498e3f7d7c498ddc071f10af8cd212d1678f"
+  },
+  {
+    "Package": "libgz-sensors8-logical-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-logical-camera (= 8.3.0-1~noble)",
+    "SHA256": "33b1ff13a89b3248e5523d4ab3f34a0cd1e3aeaab2702058ed490401e1912b7f"
+  },
+  {
+    "Package": "libgz-sensors8-magnetometer",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "530046735bf6aac82e88e2aee4360dc6bcef6115497e98ca713c3b44ff0dea82"
+  },
+  {
+    "Package": "libgz-sensors8-magnetometer-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-magnetometer (= 8.3.0-1~noble)",
+    "SHA256": "1369f38efb1b2788cb958c464a66dca7c7fb4d988d67fe38a3d8103c57274c7d"
+  },
+  {
+    "Package": "libgz-sensors8-navsat",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-sensors8 (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "7dce65e5de3de26f0f4223d9d7e117abb82035c1cc61d998a43e0d4511e70fcf"
+  },
+  {
+    "Package": "libgz-sensors8-navsat-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-navsat (= 8.3.0-1~noble)",
+    "SHA256": "b8529abca173a5d222a23eddc97b9068fd640eddec66f75e4dc65a5b49abbc31"
+  },
+  {
+    "Package": "libgz-sensors8-rendering",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "b6bde99d197c5da8871da31de17e27832c37c85bf7a335c0dd3561892602360e"
+  },
+  {
+    "Package": "libgz-sensors8-rendering-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-rendering (= 8.3.0-1~noble)",
+    "SHA256": "56020ff590614fe2bbf24035c923d65a211e59bb6694e4084627ea24f06eed55"
+  },
+  {
+    "Package": "libgz-sensors8-rgbd-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "703b9acc9b77797b820b1d5ecf053a9f62e65330981fb07ca85aa65b9cd91778"
+  },
+  {
+    "Package": "libgz-sensors8-rgbd-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-msgs10-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-rgbd-camera (= 8.3.0-1~noble)",
+    "SHA256": "f80ebe590568b418a2fb93cf72f77bc0569ca8cd7dafcf4f0874e5b3d83e70dd"
+  },
+  {
+    "Package": "libgz-sensors8-segmentation-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "63b5c135521bd505a85ee738782b9b8a10202e5cae93d9d2631a3f7d1cf45944"
+  },
+  {
+    "Package": "libgz-sensors8-segmentation-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-segmentation-camera (= 8.3.0-1~noble)",
+    "SHA256": "33b01ffe64a17b82a16a1ce1a8a0f6c593cec037cbe600e275f5852da46dea08"
+  },
+  {
+    "Package": "libgz-sensors8-thermal-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "c3109b33b909f3c9dcd88dd3ad67ee96f5a0165cd6cb8cd9eea254172cbdee4f"
+  },
+  {
+    "Package": "libgz-sensors8-thermal-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-common5-events-dev, libgz-math7-dev, libgz-msgs10-dev, libgz-transport13-core-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-thermal-camera (= 8.3.0-1~noble)",
+    "SHA256": "3e42220ccdd1ce33a8b6680d443665f414c833137941327424b95ce3735fac1f"
+  },
+  {
+    "Package": "libgz-sensors8-wide-angle-camera",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.9.0), libgz-common5-events (>= 5.9.0), libgz-common5-graphics (>= 5.9.0), libgz-math7 (>= 7.7.0), libgz-msgs10 (>= 10.4.0), libgz-rendering8 (>= 8.3.0), libgz-sensors8 (>= 8.3.0), libgz-sensors8-camera (>= 8.3.0), libgz-sensors8-rendering (>= 8.3.0), libgz-transport13 (>= 13.6.0), libprotobuf32t64 (>= 3.21.12), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "c3023124a2951db8a1cee447f64b577b085e7d9cf1e70a1123d8b1e1228d0c4b"
+  },
+  {
+    "Package": "libgz-sensors8-wide-angle-camera-dev",
+    "Version": "8.3.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-msgs10-dev, libgz-sensors8-core-dev (= 8.3.0-1~noble), libsdformat14-dev, libgz-sensors8-wide-angle-camera (= 8.3.0-1~noble)",
+    "SHA256": "5bcac8f084c5c8b58792d06864199326dfb75ae37406947ab59b252856b9e904"
+  },
+  {
+    "Package": "libgz-sim8",
+    "Version": "8.15.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.8.0), libgz-common5-av (>= 5.8.0), libgz-common5-events (>= 5.8.0), libgz-common5-geospatial (>= 5.8.0), libgz-common5-graphics (>= 5.8.0), libgz-common5-io (>= 5.8.0), libgz-fuel-tools9 (>= 9.1.1), libgz-gui8 (>= 8.4.0), libgz-math7 (>= 7.6.0), libgz-msgs10 (>= 10.4.0), libgz-physics7 (>= 7.8.0), libgz-plugin2 (>= 2.0.4), libgz-rendering8 (>= 8.2.3), libgz-sensors8 (>= 8.2.2), libgz-sensors8-air-pressure (>= 8.2.2), libgz-sensors8-air-speed (>= 8.2.2), libgz-sensors8-altimeter (>= 8.2.2), libgz-sensors8-boundingbox-camera (>= 8.2.2), libgz-sensors8-camera (>= 8.2.2), libgz-sensors8-depth-camera (>= 8.2.2), libgz-sensors8-dvl (>= 8.2.2), libgz-sensors8-force-torque (>= 8.2.2), libgz-sensors8-gpu-lidar (>= 8.2.2), libgz-sensors8-imu (>= 8.2.2), libgz-sensors8-logical-camera (>= 8.2.2), libgz-sensors8-magnetometer (>= 8.2.2), libgz-sensors8-navsat (>= 8.2.2), libgz-sensors8-rendering (>= 8.2.2), libgz-sensors8-rgbd-camera (>= 8.2.2), libgz-sensors8-segmentation-camera (>= 8.2.2), libgz-sensors8-thermal-camera (>= 8.2.2), libgz-sensors8-wide-angle-camera (>= 8.2.2), libgz-transport13 (>= 13.5.0), libgz-transport13-log (>= 13.5.0), libgz-transport13-parameters (>= 13.5.0), libprotobuf32t64 (>= 3.21.12), libpython3.12t64 (>= 3.12.1), libqt5core5t64 (>= 5.15.1), libqt5gui5t64 (>= 5.2.0) | libqt5gui5-gles (>= 5.2.0), libqt5qml5 (>= 5.0.2), libqt5quick5 (>= 5.0.2) | libqt5quick5-gles (>= 5.0.2), libqt5widgets5t64 (>= 5.0.2), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0), qml-module-qtqml-models2",
+    "SHA256": "d6081a74c80de3ad2f3a46d65e745a70b0664ace449aa6edcebba55bfa94a8f9"
+  },
+  {
+    "Package": "libgz-sim8-dev",
+    "Version": "8.15.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libtinyxml2-dev, libgz-tools2-dev, libgz-cmake3-dev, libgz-common5-av-dev, libgz-common5-graphics-dev, libgz-common5-profiler-dev, libgz-common5-events-dev, libgz-fuel-tools9-dev, libgz-gui8-dev, libgz-math7-dev, libgz-math7-eigen3-dev, libgz-msgs10-dev, libgz-plugin2-dev, libgz-physics7-dev, libgz-sensors8-dev (>= 8.2.0), libgz-rendering8-dev, libgz-transport13-log-dev, libgz-utils2-cli-dev, libgz-utils2-dev, libsdformat14-dev, libgz-sim8 (= 8.15.0-1~noble), libgz-sim8-plugins (= 8.15.0-1~noble)",
+    "SHA256": "94c7fabee7f03e7442d59eb649dceae6ec3649856c911b0829e38d79fc9e1eee"
+  },
+  {
+    "Package": "libgz-sim8-plugins",
+    "Version": "8.15.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.8.0), libgz-common5-av (>= 5.8.0), libgz-common5-events (>= 5.8.0), libgz-common5-geospatial (>= 5.8.0), libgz-common5-graphics (>= 5.8.0), libgz-common5-io (>= 5.8.0), libgz-fuel-tools9 (>= 9.1.1), libgz-gui8 (>= 8.4.0), libgz-math7 (>= 7.6.0), libgz-msgs10 (>= 10.4.0), libgz-physics7 (>= 7.8.0), libgz-plugin2 (>= 2.0.4), libgz-rendering8 (>= 8.2.3), libgz-sensors8 (>= 8.2.2), libgz-sensors8-air-pressure (>= 8.2.2), libgz-sensors8-air-speed (>= 8.2.2), libgz-sensors8-altimeter (>= 8.2.2), libgz-sensors8-boundingbox-camera (>= 8.2.2), libgz-sensors8-camera (>= 8.2.2), libgz-sensors8-depth-camera (>= 8.2.2), libgz-sensors8-dvl (>= 8.2.2), libgz-sensors8-force-torque (>= 8.2.2), libgz-sensors8-gpu-lidar (>= 8.2.2), libgz-sensors8-imu (>= 8.2.2), libgz-sensors8-logical-camera (>= 8.2.2), libgz-sensors8-magnetometer (>= 8.2.2), libgz-sensors8-navsat (>= 8.2.2), libgz-sensors8-rendering (>= 8.2.2), libgz-sensors8-rgbd-camera (>= 8.2.2), libgz-sensors8-segmentation-camera (>= 8.2.2), libgz-sensors8-thermal-camera (>= 8.2.2), libgz-sensors8-wide-angle-camera (>= 8.2.2), libgz-sim8 (>= 8.15.0), libgz-transport13 (>= 13.5.0), libgz-transport13-log (>= 13.5.0), libprotobuf32t64 (>= 3.21.12), libpython3.12t64 (>= 3.12.1), libqt5core5t64 (>= 5.15.1), libqt5gui5t64 (>= 5.0.2) | libqt5gui5-gles (>= 5.0.2), libqt5qml5 (>= 5.0.2), libqt5quick5 (>= 5.0.2) | libqt5quick5-gles (>= 5.0.2), libqt5widgets5t64 (>= 5.0.2), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0)",
+    "SHA256": "756792a64629f1b2c382608c17bba35d21f0720547d9f97649a7e09411e34d2a"
+  },
+  {
+    "Package": "libgz-tools2-dev",
+    "Version": "2.0.4-1~noble",
+    "Architecture": "amd64",
+    "Depends": "cmake, gz-tools2, libgz-cmake3-dev | libgz-cmake4-dev | libgz-cmake5-dev",
+    "SHA256": "4f3f99bfe1bfad9c30c3be35b77431e5473bb5e761c944aacae7c704705e14b4"
+  },
+  {
+    "Package": "libgz-transport13",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-msgs10 (>= 10.4.0), libprotobuf32t64 (>= 3.21.12), libstdc++6 (>= 13.1), libuuid1 (>= 2.16), libzmq5 (>= 4.0.1+dfsg)",
+    "SHA256": "46ed70c354f4664bfe1723fb2639ceee6fc9a431b8ebf0388424e0b1442f10a6"
+  },
+  {
+    "Package": "libgz-transport13-core-dev",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-transport13 (= 13.7.0-1~noble), uuid-dev, libzmq3-dev (>= 3.0.0), libgz-msgs10-dev, libgz-cmake3-dev, libgz-tools2-dev, libgz-utils2-cli-dev, libgz-utils2-dev",
+    "SHA256": "4bb84770428d27a2e74aaa842a37ad46a0c1cb81f56c7c91fc2664bb11dc098b"
+  },
+  {
+    "Package": "libgz-transport13-dev",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-transport13-core-dev (= 13.7.0-1~noble), libgz-transport13-log-dev (= 13.7.0-1~noble), libgz-transport13-parameters-dev (= 13.7.0-1~noble)",
+    "SHA256": "fdc838bfc20c2bdb6310fc7395a530b4d0e314cc6c2205478464c3e37c4a7946"
+  },
+  {
+    "Package": "libgz-transport13-log",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.34), libgcc-s1 (>= 3.3.1), libgz-msgs10 (>= 10.4.0), libgz-transport13 (>= 13.7.0), libprotobuf32t64 (>= 3.21.12), libsqlite3-0 (>= 3.5.9), libstdc++6 (>= 13.1)",
+    "SHA256": "e578f977acba2444d5bbbd41780d49c46a5d8d9c18213fc96279ed70d4322191"
+  },
+  {
+    "Package": "libgz-transport13-log-dev",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libsqlite3-dev, libgz-cmake3-dev, libgz-transport13-core-dev (= 13.7.0-1~noble), libgz-transport13-log (= 13.7.0-1~noble)",
+    "SHA256": "2741df6e01a42215fd2bf2dc480386c877ad45c4ea52306a0d0afc30d5db577f"
+  },
+  {
+    "Package": "libgz-transport13-parameters",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.34), libgcc-s1 (>= 3.3.1), libgz-msgs10 (>= 10.4.0), libgz-transport13 (>= 13.7.0), libprotobuf32t64 (>= 3.21.12), libstdc++6 (>= 13.1)",
+    "SHA256": "35285d3887d22781876fa8337108e6cec40a14b98cb4bcc6f2b3c2af9ab50004"
+  },
+  {
+    "Package": "libgz-transport13-parameters-dev",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-cmake3-dev, libgz-transport13-core-dev (= 13.7.0-1~noble), libgz-transport13-parameters (= 13.7.0-1~noble)",
+    "SHA256": "b25e2bee236ced0f9dbbe37aca809cdb74510a99f44ce27c15cc7c3b4001b392"
+  },
+  {
+    "Package": "libgz-utils2",
+    "Version": "2.2.1-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.14), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 11)",
+    "SHA256": "b54728318ccddc873aecc11611555c981c0e28c5fdce667c0a03de1fdef34a6f"
+  },
+  {
+    "Package": "libgz-utils2-cli-dev",
+    "Version": "2.2.1-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-utils2-dev (= 2.2.1-1~noble)",
+    "SHA256": "1c43d29c4761498f1d8c2c606a866e4a7e9aa5c3e5543e82dd21ce4279630a36"
+  },
+  {
+    "Package": "libgz-utils2-dev",
+    "Version": "2.2.1-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-utils2 (= 2.2.1-1~noble), libgz-cmake3-dev",
+    "SHA256": "92cb9bf38eb9e51ea4b42ad8fe1f379a956656edadcd33b10114031dd6933ac7"
+  },
+  {
+    "Package": "libogre-next-2.3-dev",
+    "Version": "2.3.1-9osrf~noble",
+    "Architecture": "amd64",
+    "Depends": "libogre-next-2.3.0 (= 2.3.1-9osrf~noble), libboost-dev, libboost-thread-dev",
+    "SHA256": "ccace21350fa4666998e232f8e2f82888c1e5af8e49908a1c6dd513652e41e1c"
+  },
+  {
+    "Package": "libogre-next-2.3.0",
+    "Version": "2.3.1-9osrf~noble",
+    "Architecture": "amd64",
+    "Depends": "libc6 (>= 2.38), libegl1, libfreeimage3 (>= 3.18.0+ds2), libfreetype6 (>= 2.2.1), libgcc-s1 (>= 3.3.1), libgl1, libstdc++6 (>= 13.1), libx11-6, libxaw7 (>= 2:1.0.14), libxrandr2 (>= 2:1.2.0), libxt6, libzzip-0-13 (>= 0.13.56), zlib1g (>= 1:1.1.4)",
+    "SHA256": "a2c256379367695f27b1e144ae1c4689af7aa86bc4a4207b08a9f3b7e012c785"
+  },
+  {
+    "Package": "libsdformat14",
+    "Version": "14.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "sdformat14-sdf (>= 14.9.0-1~noble), libc6 (>= 2.38), libgcc-s1 (>= 3.3.1), libgz-math7 (>= 7.5.1), libgz-utils2 (>= 2.2.1), libstdc++6 (>= 13.1), libtinyxml2-10 (>= 10.0.0)",
+    "SHA256": "43e6aca977a191c7f75ce612ba4cd50711fe893e2013a7e4c0d4e62f2823a6a7"
+  },
+  {
+    "Package": "libsdformat14-dev",
+    "Version": "14.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libtinyxml2-dev, libgz-tools2-dev, libgz-math7-dev, libgz-utils2-cli-dev, libgz-utils2-dev, libsdformat14 (= 14.9.0-1~noble)",
+    "SHA256": "f9dfb718898cb00cb83a0c65892b7f043c5dda36539e8d7ea4249c33d8914c13"
+  },
+  {
+    "Package": "python3-gz-math7",
+    "Version": "7.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-math7 (= 7.7.0-1~noble), python3-pybind11, python3 (<< 3.13), python3 (>= 3.12~), python3:any (>= 3.2~)",
+    "SHA256": "7be47e69595458ebb56c880f63d48acdd7b14405a84ca7a75e7b6f0b0fb73e95"
+  },
+  {
+    "Package": "python3-gz-msgs10",
+    "Version": "10.4.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-msgs10 (= 10.4.0-1~noble), python3-protobuf, python3:any",
+    "SHA256": "082f2a7a947af0c3e88fe4765dd82dba6f596f31a601269e0585ab675ba1f6dc"
+  },
+  {
+    "Package": "python3-gz-sim8",
+    "Version": "8.15.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-sim8 (= 8.15.0-1~noble), python3-gz-math7, python3-gz-msgs10, python3-gz-transport13, python3-pybind11, python3-sdformat14, python3 (<< 3.13), python3 (>= 3.12~), libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libgz-common5 (>= 5.8.0), libgz-msgs10 (>= 10.4.0), libsdformat14 (>= 14.9.0), libstdc++6 (>= 13.1)",
+    "SHA256": "4774c7feb1420b99a5a438f95bf563e769c842b191485f7c67e570cd80b5b6fd"
+  },
+  {
+    "Package": "python3-gz-transport13",
+    "Version": "13.7.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "libgz-transport13 (= 13.7.0-1~noble), python3-pybind11, python3-gz-msgs10, libc6 (>= 2.32), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 13.1), python3 (<< 3.13), python3 (>= 3.12~), python3:any",
+    "SHA256": "6f6c358f8dfa550a7fb19e542d18caf166cb869e087c707b71c0b71c53fd0b74"
+  },
+  {
+    "Package": "python3-sdformat14",
+    "Version": "14.9.0-1~noble",
+    "Architecture": "amd64",
+    "Depends": "python3-gz-math7",
+    "SHA256": "266a6f583f11359e30e6f32958dd665d056ad8753e85dfa8d992bef937b25d3d"
+  },
+  {
+    "Package": "sdformat14-sdf",
+    "Version": "14.9.0-1~noble",
+    "Architecture": "all",
+    "SHA256": "570eba1289800119d351e90df2817f3a50128e0ba3aa42e78e34817fdf19f40e"
+  }
+]
