@@ -5,7 +5,8 @@ Ubuntu drops superseded versions from -updates and -security, which broke the
 clean development image in #23. After #37 the daily check is an early warning
 of how far the pinned snapshot lags the live archive, and still the monitor
 for OSRF pins. Offline: the lock is well-formed and the Mesa set shares one
-version. LIVINGPROOF_NETWORK=1: each lock pin, and the Dockerfile git-layer
+version; recorded OSRF metadata guards dependencies and digest coverage.
+LIVINGPROOF_NETWORK=1: each lock pin, and the Dockerfile git-layer
 apt pins, is present in noble, noble-updates, noble-security or the OSRF
 gazebo-stable noble index (amd64, https only). Recorded OSRF SHA256 values
 must also match the live index for the same package version. This monitors
@@ -15,6 +16,7 @@ hashes daily; it does not enforce the recorded hashes at install time.
 from __future__ import annotations
 
 import gzip
+import json
 import os
 import re
 import urllib.request
@@ -190,17 +192,17 @@ def _check_osrf_sha256s(text: str, lock: Path) -> None:
 @network
 def test_every_lock_and_dockerfile_pin_is_in_the_live_noble_or_osrf_index():
     versions: dict[str, set[str]] = defaultdict(set)
-    urls = [
-        f"{ARCHIVE}/{suite}/{component}/binary-amd64/Packages.gz"
-        for suite in SUITES
-        for component in COMPONENTS
-    ] + [OSRF]
-    for url in urls:
-        text = _fetch_packages(url)
-        if url == OSRF:
-            _check_osrf_sha256s(text, LOCK)
-        for key, found in _index_versions(text).items():
-            versions[key].update(found)
+    for suite in SUITES:
+        for component in COMPONENTS:
+            url = f"{ARCHIVE}/{suite}/{component}/binary-amd64/Packages.gz"
+            for key, found in _index_versions(_fetch_packages(url)).items():
+                versions[key].update(found)
+    osrf = _fetch_packages(OSRF)
+    _check_digest_coverage(osrf, versions, LOCK)
+    _check_osrf_sha256s(osrf, LOCK)
+    _check_exact_dependencies(osrf, LOCK)
+    for key, found in _index_versions(osrf).items():
+        versions[key].update(found)
     missing = []
     for name, version in _pins(LOCK):
         have = versions.get(name) or versions.get(_base(name), set())
@@ -216,36 +218,103 @@ def test_every_lock_and_dockerfile_pin_is_in_the_live_noble_or_osrf_index():
     )
 
 
-def _index_sha256s(text: str) -> dict[tuple[str, str], str]:
-    """Return (name, version) -> SHA256 for each stanza of an OSRF Packages file."""
-    found: dict[tuple[str, str], str] = {}
-    name = version = sha = None
-    for line in text.splitlines() + [""]:
-        if line.startswith("Package:"):
-            name = line.split(":", 1)[1].strip()
-        elif line.startswith("Version:"):
-            version = line.split(":", 1)[1].strip()
-        elif line.startswith("SHA256:"):
-            sha = line.split(":", 1)[1].strip()
-        elif line == "":
-            if name and version and sha:
-                found[(name, version)] = sha
-            name = version = sha = None
-    return found
+def _stanzas(text: str) -> list[dict[str, str]]:
+    """Read Debian control fields, including continuation lines."""
+    records = []
+    fields: dict[str, str] = {}
+    key = ""
+    for line in (text + "\n\n").splitlines():
+        if not line:
+            if fields:
+                records.append(fields)
+            fields = {}
+            key = ""
+        elif line[0].isspace() and key:
+            fields[key] += " " + line.strip()
+        else:
+            key, value = line.split(":", 1)
+            fields[key] = value.strip()
+    return records
 
 
-@network
-def test_every_recorded_osrf_sha256_matches_the_live_osrf_index():
-    """A pin that resolves by version must also match the published digest (#46)."""
-    live = _index_sha256s(_fetch_packages(OSRF))
-    bad = []
-    for name, digest in _osrf_sha256s(LOCK).items():
-        version = dict(_pins(LOCK))[name]
-        have = live.get((_base(name), version))
-        if have != digest:
-            bad.append(
-                f"{name}={version} recorded {digest[:12]} live {(have or 'absent')[:12]}"
-            )
-    assert bad == [], (
-        f"{len(bad)} OSRF digest(s) do not match the live index: " + "; ".join(bad)
+def _check_exact_dependencies(text: str, lock: Path) -> None:
+    """Require each exact dependency, including an absent lock entry.
+
+    This is deliberately not an apt solver. Fail explicitly on exact-version
+    alternative groups rather than silently ignoring unsupported constraints.
+    """
+    pins = dict(_pins(lock))
+    locked = {_base(name): version for name, version in pins.items()}
+    records = _stanzas(text)
+    osrf_names = {r["Package"] for r in records}
+    selected = [
+        r
+        for r in records
+        if r.get("Architecture") in {"amd64", "all"}
+        and locked.get(r["Package"]) == r["Version"]
+    ]
+    available = {r["Package"] for r in selected}
+    errors = [
+        f"{name}={version}: missing OSRF package/version metadata"
+        for name, version in locked.items()
+        if name in osrf_names and name not in available
+    ]
+    for record in selected:
+        for field in ("Depends", "Pre-Depends"):
+            for dep in record.get(field, "").split(","):
+                if not re.search(r"\(\s*=", dep):
+                    continue
+                match = re.fullmatch(r"\s*([^\s(|]+)\s*\(=\s*([^)]+)\)\s*", dep)
+                if not match:
+                    errors.append(
+                        f"{record['Package']}: unsupported exact dependency {dep}"
+                    )
+                    continue
+                name, version = match.groups()
+                found = pins.get(name) if ":" in name else locked.get(name)
+                if found != version.strip():
+                    errors.append(
+                        f"{record['Package']}: requires {dep.strip()}, "
+                        f"locked {found or '<missing>'}"
+                    )
+    assert not errors, "OSRF exact dependencies: " + "; ".join(errors)
+
+
+def _check_digest_coverage(osrf: str, ubuntu: dict[str, set[str]], lock: Path) -> None:
+    # A removed version still needs its digest. Presence and hash checks report
+    # the unavailable version separately; a missing digest must not hide it.
+    versions = _index_versions(osrf)
+    digests = _osrf_sha256s(lock)
+    missing = [
+        f"{name}={version}"
+        for name, version in _pins(lock)
+        if name in versions
+        and version not in ubuntu.get(name, set())
+        and not re.fullmatch(r"[0-9a-f]{64}", digests.get(name, ""))
+    ]
+    assert not missing, "OSRF-only pins without a recorded sha256: " + ", ".join(
+        missing
     )
+
+
+def _recorded_osrf_index() -> str:
+    records = json.loads(
+        (ROOT / "tests/fixtures/osrf-locked-packages.json").read_text()
+    )
+    names = {record["Package"] for record in records}
+    missing = {_base(name) for name in _osrf_sha256s(LOCK)} - names
+    assert not missing, f"Refresh recorded OSRF metadata for: {sorted(missing)}"
+    return "\n\n".join(
+        "\n".join(f"{key}: {value}" for key, value in record.items())
+        for record in records
+    )
+
+
+def test_locked_osrf_exact_dependencies_match_recorded_index():
+    _check_exact_dependencies(_recorded_osrf_index(), LOCK)
+
+
+def test_recorded_osrf_only_pins_have_digests():
+    # Conservatively require hashes for every recorded OSRF package name.
+    # The live monitor additionally allows an exact version available in Ubuntu.
+    _check_digest_coverage(_recorded_osrf_index(), {}, LOCK)
