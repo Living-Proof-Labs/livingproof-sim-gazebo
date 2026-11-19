@@ -15,8 +15,10 @@ The selection contains all 124 OSRF package names recorded in main's lock at
 The index no longer contains `libgz-cmake3-dev=3.6.0-1~noble`; its actual current
 3.7.0 stanza is retained. The offline check intentionally reports that missing
 version instead of inventing old metadata or silently omitting the package.
-The old package's pool URL also returned HTTP 404. Repair of that pin needs a
-separate reviewed lock update before the real-lock dependency test can pass.
+The old package's pool URL also returned HTTP 404. The separate reviewed pin
+repair in PR #58, merged at `9968ca9`, updated the lock to the captured 3.7.0
+version and digest. With that repair integrated, all 124 recorded package
+versions match the lock; the historical fixture has not been regenerated.
 
 The fixture is independent of the lock under test: do not regenerate it from
 lock versions or hashes. To refresh after a reviewed pin change, fetch the URL,
