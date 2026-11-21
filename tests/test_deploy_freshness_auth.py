@@ -30,7 +30,7 @@ DIRECT_HTTP = re.compile(
 )
 GH_API = re.compile(r"\bgh\s+api\b")
 EXPECTED_SHA = "a" * 40
-STALE_MESSAGE = "Refusing stale deployment: workflow revision is no longer main"
+STALE_MESSAGE = "Skipped stale deployment: workflow revision is no longer main"
 OUTSIDE_MAIN = "Refusing deployment outside main"
 
 UNAUTHENTICATED = """\
@@ -289,7 +289,8 @@ def test_repository_workflows_authenticate_every_main_freshness_read():
     }
     steps = job["steps"]
     guard = steps[0]
-    assert guard["name"] == "Reject stale main revision"
+    assert guard["name"] == "Check deployment freshness"
+    assert guard["id"] == "freshness"
     assert guard["env"]["GH_TOKEN"] == "${{ github.token }}"
     assert "urlopen(request, timeout=30)" in guard["run"]
     assert "urlopen(url" not in guard["run"]
@@ -300,6 +301,7 @@ def test_repository_workflows_authenticate_every_main_freshness_read():
     assert OUTSIDE_MAIN in guard["run"]
     assert "continue-on-error" not in guard
     assert steps[1]["uses"].startswith("actions/deploy-pages@")
+    assert steps[1]["if"] == "steps.freshness.outputs.current == 'true'"
 
 
 def test_unauthenticated_urllib_freshness_read_fails():
@@ -344,6 +346,8 @@ def _run_guard(tmp_path, *, remote_sha, http_status, ref="refs/heads/main"):
             "PATH": os.environ["PATH"],
             "PYTHONPATH": str(tmp_path),
             "PYTHONDONTWRITEBYTECODE": "1",
+            "GITHUB_OUTPUT": str(tmp_path / "output"),
+            "GITHUB_STEP_SUMMARY": str(tmp_path / "summary"),
             "GITHUB_REF": ref,
             "GITHUB_SHA": EXPECTED_SHA,
             "GITHUB_API_URL": API,
@@ -366,12 +370,13 @@ def _run_guard(tmp_path, *, remote_sha, http_status, ref="refs/heads/main"):
     ("remote_sha", "http_status", "expected_code", "message"),
     [
         (EXPECTED_SHA, 200, 0, None),
-        ("b" * 40, 200, 1, STALE_MESSAGE),
-        ("", 200, 1, STALE_MESSAGE),
+        ("b" * 40, 200, 0, STALE_MESSAGE),
+        ("", 200, 1, "Invalid current main SHA"),
+        ("not-a-sha", 200, 1, "Invalid current main SHA"),
         (EXPECTED_SHA, 403, 1, None),
     ],
 )
-def test_deploy_guard_still_aborts_when_main_moved_or_the_read_fails(
+def test_deploy_guard_skips_stale_but_fails_invalid_or_failed_reads(
     tmp_path, remote_sha, http_status, expected_code, message
 ):
     result, record = _run_guard(
@@ -382,10 +387,17 @@ def test_deploy_guard_still_aborts_when_main_moved_or_the_read_fails(
     assert record["authorization"] == "Bearer workflow-token"
     assert record["url"] == FRESHNESS_URL
     assert record["timeout"] == 30
-    if message is not None:
-        assert message in result.stderr
     if expected_code == 0:
-        assert "Deployment revision matches current main" in result.stdout
+        fresh = remote_sha == EXPECTED_SHA
+        assert (tmp_path / "output").read_text() == f"current={str(fresh).lower()}\n"
+        if fresh:
+            assert "Deployment revision matches current main" in result.stdout
+        else:
+            assert message in (tmp_path / "summary").read_text()
+    else:
+        assert not (tmp_path / "output").exists()
+        if message is not None:
+            assert message in result.stderr
     assert "workflow-token" not in result.stderr
 
 

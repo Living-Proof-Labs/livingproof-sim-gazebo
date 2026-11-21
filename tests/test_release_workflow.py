@@ -321,18 +321,7 @@ def test_release_trigger_permissions_and_pinned_engine():
     assert workflow["concurrency"]["cancel-in-progress"] is False
     release = workflow["jobs"]["release"]
     assert release["permissions"] == {"contents": "write"}
-    # Pinned to an exact guidelines release tag, and the same tag the Renovate
-    # preset uses, so a guidelines bump updates both together without editing
-    # this test.
-    engine = re.fullmatch(
-        r"Living-Proof-Labs/collaboration-guidelines/\.github/workflows/"
-        r"semantic-release\.yml@(v\d+\.\d+\.\d+)",
-        release["uses"],
-    )
-    assert engine, release["uses"]
-    renovate = json.loads((ROOT / "renovate.json").read_text())
-    preset = "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#"
-    assert f"{preset}{engine.group(1)}" in renovate["extends"]
+    _assert_engine_pin(workflow, json.loads((ROOT / "renovate.json").read_text()))
     assert release["with"] == {"draft-release": True}
     verification = yaml.safe_load((ROOT / ".github/workflows/verify.yml").read_text())
     assert verification["name"] == "Gazebo verification"
@@ -397,3 +386,54 @@ def test_bypassing_the_actual_assembly_guard_is_detected(
     monkeypatch.setattr(__import__(__name__), "_load_workflow", lambda: workflow)
     with pytest.raises(AssertionError):
         test_sha_guard_commands_accept_a_matching_tag_and_reject_mismatches(tmp_path)
+
+
+def _assert_engine_pin(workflow, renovate):
+    uses = workflow["jobs"]["release"]["uses"]
+    engine = re.fullmatch(
+        r"Living-Proof-Labs/collaboration-guidelines/\.github/workflows/"
+        r"semantic-release\.yml@(v(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*))",
+        uses,
+    )
+    assert engine, uses
+    prefix = "github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#"
+    presets = [item for item in renovate["extends"] if item.startswith(prefix)]
+    assert presets == [f"{prefix}{engine.group(1)}"]
+
+
+def _pin_inputs(ref, preset):
+    workflow = _load_workflow()
+    workflow["jobs"]["release"]["uses"] = (
+        "Living-Proof-Labs/collaboration-guidelines/.github/workflows/"
+        f"semantic-release.yml@{ref}"
+    )
+    return workflow, {
+        "extends": [
+            f"github>Living-Proof-Labs/collaboration-guidelines:renovate-preset#{preset}"
+        ]
+    }
+
+
+@pytest.mark.parametrize("ref", ["main", "v9.6", "v9", "a" * 40, "v09.6.1"])
+def test_release_engine_rejects_non_exact_pins_even_when_preset_matches(ref):
+    with pytest.raises(AssertionError):
+        _assert_engine_pin(*_pin_inputs(ref, ref))
+
+
+def test_release_engine_rejects_preset_left_behind():
+    with pytest.raises(AssertionError):
+        _assert_engine_pin(*_pin_inputs("v9.6.16", "v9.6.15"))
+
+
+def test_release_engine_accepts_simultaneous_exact_bump():
+    _assert_engine_pin(*_pin_inputs("v9.6.16", "v9.6.16"))
+
+
+def test_release_engine_requires_one_matching_preset():
+    workflow, renovate = _pin_inputs("v9.6.16", "v9.6.16")
+    renovate["extends"] *= 2
+    with pytest.raises(AssertionError):
+        _assert_engine_pin(workflow, renovate)
+    renovate["extends"] = []
+    with pytest.raises(AssertionError):
+        _assert_engine_pin(workflow, renovate)
