@@ -94,3 +94,49 @@ jobs:
           curl -fsSL "$base/livingproof_sim_gazebo-${VERSION}-py3-none-any.whl" -o "$tmp/livingproof_sim_gazebo-${VERSION}-py3-none-any.whl"
           curl -fsSL "$base/livingproof_sim_gazebo-${VERSION}.tar.gz" -o "$tmp/livingproof_sim_gazebo-${VERSION}.tar.gz"
           (cd "$tmp" && sha256sum -c SHA256SUMS)
+  deploy-manual:
+    needs: [release, assemble]
+    if: needs.release.outputs.draft-created == 'true' && needs.assemble.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      RELEASE_TAG: ${{ needs.release.outputs.git-tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ needs.release.outputs.git-tag }}
+          persist-credentials: false
+      - name: Require release tag to match the exact verified commit
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse "${RELEASE_TAG}^{commit}")" = "$GITHUB_SHA"
+      - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e
+        with:
+          version: '3.54.0'
+      - name: Match checkout ownership
+        run: |
+          echo "LOCAL_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "LOCAL_GID=$(id -g)" >> "$GITHUB_ENV"
+      - run: task setup
+      - run: task docs
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: artifacts/manual
+          retention-days: 1
+      - name: Require current main before deploying
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)
+          test "$current" = "$GITHUB_SHA"
+      - name: Deploy released manual
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
