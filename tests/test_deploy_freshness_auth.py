@@ -279,8 +279,8 @@ def test_repository_workflows_authenticate_every_main_freshness_read():
             calls.append(name)
         problems.extend(freshness_problems(name, text))
     assert problems == [], "\n".join(problems)
-    assert calls == ["verify.yml"]
-    document = yaml.safe_load((WORKFLOWS / "verify.yml").read_text())
+    assert calls == ["release.yml"]
+    document = yaml.safe_load((WORKFLOWS / "release.yml").read_text())
     job = document["jobs"]["deploy-docs"]
     assert job["permissions"] == {
         "contents": "read",
@@ -288,7 +288,7 @@ def test_repository_workflows_authenticate_every_main_freshness_read():
         "id-token": "write",
     }
     steps = job["steps"]
-    guard = steps[0]
+    guard = steps[-2]
     assert guard["name"] == "Check deployment freshness"
     assert guard["id"] == "freshness"
     assert guard["env"]["GH_TOKEN"] == "${{ github.token }}"
@@ -300,8 +300,8 @@ def test_repository_workflows_authenticate_every_main_freshness_read():
     assert STALE_MESSAGE in guard["run"]
     assert OUTSIDE_MAIN in guard["run"]
     assert "continue-on-error" not in guard
-    assert steps[1]["uses"].startswith("actions/deploy-pages@")
-    assert steps[1]["if"] == "steps.freshness.outputs.current == 'true'"
+    assert steps[-1]["uses"].startswith("actions/deploy-pages@")
+    assert steps[-1]["if"] == "steps.freshness.outputs.current == 'true'"
 
 
 def test_unauthenticated_urllib_freshness_read_fails():
@@ -336,8 +336,8 @@ def test_contents_write_fails_even_when_the_read_sends_a_token():
 
 
 def _run_guard(tmp_path, *, remote_sha, http_status, ref="refs/heads/main"):
-    document = yaml.safe_load((WORKFLOWS / "verify.yml").read_text())
-    guard = document["jobs"]["deploy-docs"]["steps"][0]
+    document = yaml.safe_load((WORKFLOWS / "release.yml").read_text())
+    guard = document["jobs"]["deploy-docs"]["steps"][-2]
     (tmp_path / "sitecustomize.py").write_text(SITECUSTOMIZE)
     capture = tmp_path / "capture.json"
     result = subprocess.run(

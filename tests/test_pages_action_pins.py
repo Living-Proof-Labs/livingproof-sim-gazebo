@@ -17,12 +17,9 @@ from pathlib import Path
 
 import pytest
 
-WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "verify.yml"
+WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "release.yml"
 
-PAGES_ACTIONS = (
-    "actions/upload-pages-artifact",
-    "actions/deploy-pages",
-)
+PAGES_ACTIONS = ("actions/deploy-pages",)
 
 USES = re.compile(
     r"uses:\s+(?P<action>actions/(?:upload-pages-artifact|deploy-pages))"
@@ -76,6 +73,6 @@ def test_pages_action_pins_name_a_full_release_tag():
 )
 def test_pages_action_shas_match_the_commented_tags():
     found = _pins()
-    assert found, "expected Pages action pins in verify.yml"
+    assert found, "expected Pages action pins in release.yml"
     for action, sha, tag in found:
         assert sha == _peeled_tag_commit(action, tag), (action, tag, sha)
