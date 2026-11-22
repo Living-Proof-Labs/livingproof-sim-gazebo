@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """Stage and verify the existing manual, without importing native Gazebo."""
+import argparse
 import hashlib
 from html.parser import HTMLParser
 import json
@@ -8,6 +9,8 @@ import shutil
 import subprocess
 from urllib.parse import unquote, urlsplit
 from urllib.request import urlopen
+
+from manual_release import hashes, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'artifacts/docs-source'
@@ -52,6 +55,15 @@ def check_site():
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--release', type=Path, help='Exact published immutable release metadata')
+    args = parser.parse_args()
+    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    release_identity = {'channel': 'development'}
+    if args.release:
+        release = json.loads(args.release.read_text())
+        tag = release.get('tag_name', '')
+        release_identity = validate(release, tag, tag.removeprefix('v'), commit)
     lock = json.loads((ROOT / 'docs-brand.lock.json').read_text())
     url = f"https://raw.githubusercontent.com/{lock['repository']}/{lock['commit']}/{lock['path']}"
     with urlopen(url, timeout=30) as response:
@@ -65,13 +77,16 @@ def main():
     (SOURCE / 'assets/brand.css').write_bytes(brand)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
-    identity = {'repository': REPO, 'commit': commit, 'dirty': dirty, 'brand': lock}
+    identity = {'repository': REPO, 'commit': commit, 'dirty': dirty, 'brand': lock, **release_identity}
+    label = release_identity.get('tag', 'development')
+    description = ('This manual describes the exact immutable stable release.' if args.release else
+                   'This manual describes the checked-out development source, not a stable package release.')
     (SOURCE / 'build.json').write_text(json.dumps(identity, indent=2) + '\n')
     (SOURCE / 'version.md').write_text(
         '# Version and source\n\n'
-        f'Docs: development · [{commit[:12]}]({REPO}/tree/{commit}).\n\n'
+        f'Docs: {label} · [{commit[:12]}]({REPO}/tree/{commit}).\n\n'
         f'Full source revision: `{commit}`. Working tree modified: `{dirty}`.\n\n'
-        'This manual describes the checked-out development source, not a stable package release.\n'
+        f'{description}\n'
         'Supported native context: Ubuntu 24.04 amd64, Gazebo Harmonic / Sim 8.\n\n'
         f'[Machine-readable identity](build.json) · [Source tags]({REPO}/tags).\n\n'
         'Historical rendered manuals are not maintained; use source tags for earlier revisions.\n'
@@ -80,6 +95,7 @@ def main():
     )
     subprocess.run(['zensical', 'build', '--clean'], cwd=ROOT, check=True)
     check_site()
+    (ROOT / 'artifacts/manual-sha256.json').write_text(json.dumps(hashes(SITE), indent=2) + '\n')
 
 
 if __name__ == '__main__':

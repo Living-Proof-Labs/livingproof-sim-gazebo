@@ -28,7 +28,7 @@ tasks:
     cmds: [bash tools/run-task.sh docs:reference]
   docs:
     desc: Build the browsable manual
-    cmds: [bash tools/run-task.sh docs]
+    cmds: ['bash tools/run-task.sh docs -- {{.CLI_ARGS}}']
   smoke:
     desc: Test the built wheel outside the checkout
     cmds: [bash tools/run-task.sh smoke]

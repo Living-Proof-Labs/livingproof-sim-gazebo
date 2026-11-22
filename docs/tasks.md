@@ -40,7 +40,7 @@ task: docs
 Build the browsable manual
 
 commands:
- - bash tools/run-task.sh docs
+ - bash tools/run-task.sh docs --
 ```
 
 ### `task hallway`
