@@ -6,7 +6,7 @@ FROM ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9
 # and snapshot.ubuntu.com is https-only, so one live-archive install provides
 # the bundle before sources switch to the snapshot. The locked install then
 # pins the snapshot's ca-certificates. A public CA root is not vendored.
-ARG UBUNTU_SNAPSHOT=20261118T000000Z
+ARG UBUNTU_SNAPSHOT=20261122T000000Z
 ARG UBUNTU_IMAGE_CREATED=2026-11-10T08:36:35Z
 COPY --from=uv-tools /uv /uvx /usr/local/bin/
 COPY tools/gazebo.gpg /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
