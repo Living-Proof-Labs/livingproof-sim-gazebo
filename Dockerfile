@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 FROM ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21 AS uv-tools
-FROM ubuntu:24.04@sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8 AS development
+FROM ubuntu:24.04@sha256:562111b88caa79c71391c0c4d3c2114a7d5c35915c20561fd893cb1e07929e6b AS development
 # UBUNTU_SNAPSHOT must match tools/ubuntu-snapshot.pin and the lock header.
 # ca-certificates is the one unpinned package: the base image has no CA bundle
 # and snapshot.ubuntu.com is https-only, so one live-archive install provides
